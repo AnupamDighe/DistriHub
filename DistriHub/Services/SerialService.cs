@@ -13,14 +13,14 @@ namespace DistriHub.Services
             _repo = repo;
         }
 
-        public Task<int> ValidateSerialAsync(string materialCode, string serialNumber, string source, string accessCode)
+        public Task<int> ValidateSerialAsync(string materialCode, string serialNumber, string source)
         {
-            return _repo.ValidateSerialAsync(materialCode, serialNumber, source, accessCode);
+            return _repo.ValidateSerialAsync(materialCode, serialNumber, source);
         }
 
-        public Task<int> UnfreezeSerialAsync(string materialCode, string serialNumber, string source, string accessCode)
+        public Task<int> UnfreezeSerialAsync(string materialCode, string serialNumber, string source)
         {
-            return _repo.UnfreezeSerialAsync(materialCode, serialNumber, source, accessCode);
+            return _repo.UnfreezeSerialAsync(materialCode, serialNumber, source);
         }
     }
 }

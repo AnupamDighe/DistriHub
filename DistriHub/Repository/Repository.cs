@@ -11,10 +11,12 @@ namespace DistriHub.Repository
     public class Repository : IRepository
     {
         private readonly string _connectionString;
+        private readonly Microsoft.Extensions.Logging.ILogger<Repository> _logger;
 
-        public Repository(IConfiguration configuration)
+        public Repository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<Repository> logger)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _logger = logger;
         }
 
         public async Task<IEnumerable<SubCategory>> GetSubCategoriesByCategoryIdAsync(int categoryId)
@@ -95,9 +97,10 @@ namespace DistriHub.Repository
         // -3 = Serial Number Already Validated
         // -4 = Invalid Material code
         // -5 = Invalid Access Code
-        public async Task<int> ValidateSerialAsync(string materialCode, string serialNumber, string source, string accessCode)
+        public async Task<int> ValidateSerialAsync(string materialCode, string serialNumber, string source)
         {
-            if (!await IsAccessCodeValidAsync(source, accessCode))
+            // source is the username extracted from the authenticated JWT token; ensure it exists in UserDetails
+            if (!await IsSourceValidAsync(source))
                 return -5;
 
             if (!IsMaterialCodeValid(materialCode))
@@ -122,9 +125,9 @@ namespace DistriHub.Repository
             return 0;
         }
 
-        public async Task<int> UnfreezeSerialAsync(string materialCode, string serialNumber, string source, string accessCode)
+        public async Task<int> UnfreezeSerialAsync(string materialCode, string serialNumber, string source)
         {
-            if (!await IsAccessCodeValidAsync(source, accessCode))
+            if (!await IsSourceValidAsync(source))
                 return -5;
 
             if (!IsMaterialCodeValid(materialCode))
@@ -150,16 +153,13 @@ namespace DistriHub.Repository
         }
 
         #region Serial validation helpers
-        private async Task<bool> IsAccessCodeValidAsync(string source, string accessCode)
+        private async Task<bool> IsSourceValidAsync(string source)
         {
-            if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(accessCode))
+            if (string.IsNullOrWhiteSpace(source))
                 return false;
 
             var pwd = await GetPasswordByUsernameAsync(source.Trim());
-            if (pwd == null)
-                return false;
-
-            return string.Equals(pwd, accessCode.Trim(), StringComparison.Ordinal);
+            return pwd != null;
         }
 
         public async Task<string?> GetPasswordByUsernameAsync(string username)
@@ -180,6 +180,38 @@ namespace DistriHub.Repository
             return Convert.ToString(result);
         }
 
+        public async Task SetRefreshTokenAsync(string username, string? refreshToken, DateTime expiry)
+        {
+            const string sql = "UPDATE dbo.UserDetails SET RefreshToken = @RefreshToken, RefreshTokenExpiry = @Expiry WHERE Username = @Username";
+
+            await using var conn = new SqlConnection(_connectionString);
+            await using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.Add("@RefreshToken", SqlDbType.NVarChar, 200).Value = (object?)refreshToken ?? DBNull.Value;
+            cmd.Parameters.Add("@Expiry", SqlDbType.DateTime2).Value = expiry;
+            cmd.Parameters.Add("@Username", SqlDbType.NVarChar, 200).Value = username;
+            await conn.OpenAsync();
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        public async Task<(string? RefreshToken, DateTime? Expiry)> GetRefreshTokenAsync(string username)
+        {
+            const string sql = "SELECT RefreshToken, RefreshTokenExpiry FROM dbo.UserDetails WHERE Username = @Username";
+
+            await using var conn = new SqlConnection(_connectionString);
+            await using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.Add("@Username", SqlDbType.NVarChar, 200).Value = username;
+            await conn.OpenAsync();
+            await using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                var token = reader.IsDBNull(0) ? null : reader.GetString(0);
+                var expiry = reader.IsDBNull(1) ? (DateTime?)null : reader.GetDateTime(1);
+                return (token, expiry);
+            }
+
+            return (null, null);
+        }
+
         private static bool IsMaterialCodeValid(string materialCode)
         {
             if (string.IsNullOrWhiteSpace(materialCode))
@@ -196,7 +228,7 @@ namespace DistriHub.Repository
             return System.Text.RegularExpressions.Regex.IsMatch(serial.Trim(), "^M\\d+Y\\d+$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
-        private static bool DoesModelMatchSerial(string materialCode, string serial)
+        private bool DoesModelMatchSerial(string materialCode, string serial)
         {
             try
             {
@@ -211,8 +243,11 @@ namespace DistriHub.Repository
 
                 return string.Equals(matDigits, serDigits, StringComparison.Ordinal);
             }
-            catch
+            catch (Exception ex)
             {
+                // If any unexpected error occurs while validating pattern, treat as mismatch.
+                // Log the exception for diagnostics.
+                try { _logger?.LogError(ex, "Error while validating serial/model pattern for material '{MaterialCode}' serial '{Serial}'", materialCode, serial); } catch { }
                 return false;
             }
         }

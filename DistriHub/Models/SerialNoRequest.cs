@@ -6,7 +6,5 @@ namespace DistriHub.Models
     {
         public string? MaterialCode { get; set; }
         public string? SerialNumber { get; set; }
-        public string? Source { get; set; }
-        public string? AccessCode { get; set; }
     }
 }

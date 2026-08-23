@@ -10,10 +10,12 @@ namespace DistriHub.Controllers
     public class CategoryController : Controller
     {
         private readonly IRepository _repository;
+        private readonly Microsoft.Extensions.Logging.ILogger<CategoryController> _logger;
 
-        public CategoryController(IRepository repository)
+        public CategoryController(IRepository repository, Microsoft.Extensions.Logging.ILogger<CategoryController> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -54,12 +56,14 @@ namespace DistriHub.Controllers
             catch (SqlException sqlEx)
             {
                 // Handle SQL errors (e.g. unique constraint violation)
-                ModelState.AddModelError(string.Empty, "Unable to save category: " + sqlEx.Message);
+                _logger.LogError(sqlEx, "Failed to add category {CategoryName}", dto.CategoryName);
+                ModelState.AddModelError(string.Empty, "Unable to save category.");
                 return View(dto);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred: " + ex.Message);
+                _logger.LogError(ex, "Unexpected error while adding category {CategoryName}", dto.CategoryName);
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
                 return View(dto);
             }
         }

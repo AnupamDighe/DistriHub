@@ -29,13 +29,15 @@ namespace DistriHub.Controllers
                 return BadRequest(new ResultWrapper { Result = new[] { new SerialResponse { responseStatus = "-7", responseMessage = "Invalid request body" } } });
 
             int code;
+            // get source (username) from JWT claims - token is issued by AuthController
+            var source = User?.FindFirst("source")?.Value ?? User?.Identity?.Name ?? string.Empty;
             switch (op.Trim())
             {
                 case "IsSerialNoUsed":
-                    code = await _service.ValidateSerialAsync(request.MaterialCode ?? string.Empty, request.SerialNumber ?? string.Empty, request.Source ?? string.Empty, request.AccessCode ?? string.Empty);
+                    code = await _service.ValidateSerialAsync(request.MaterialCode ?? string.Empty, request.SerialNumber ?? string.Empty, source ?? string.Empty);
                     break;
                 case "SerialNoUnfreeze":
-                    code = await _service.UnfreezeSerialAsync(request.MaterialCode ?? string.Empty, request.SerialNumber ?? string.Empty, request.Source ?? string.Empty, request.AccessCode ?? string.Empty);
+                    code = await _service.UnfreezeSerialAsync(request.MaterialCode ?? string.Empty, request.SerialNumber ?? string.Empty, source ?? string.Empty);
                     break;
                 default:
                     return BadRequest(new ResultWrapper { Result = new[] { new SerialResponse { responseStatus = "-8", responseMessage = "Unknown operation" } } });

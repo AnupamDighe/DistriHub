@@ -11,10 +11,12 @@ namespace DistriHub.Controllers
     public class ModelController : Controller
     {
         private readonly IRepository _repository;
+        private readonly Microsoft.Extensions.Logging.ILogger<ModelController> _logger;
 
-        public ModelController(IRepository repository)
+        public ModelController(IRepository repository, Microsoft.Extensions.Logging.ILogger<ModelController> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -63,12 +65,14 @@ namespace DistriHub.Controllers
             }
             catch (SqlException sqlEx)
             {
-                ModelState.AddModelError(string.Empty, "Unable to save model: " + sqlEx.Message);
+                _logger.LogError(sqlEx, "Failed to add model {ModelName} in SubCategory {SubCategoryId}", dto.ModelName, dto.SubCategoryId);
+                ModelState.AddModelError(string.Empty, "Unable to save model.");
                 return View(dto);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred: " + ex.Message);
+                _logger.LogError(ex, "Unexpected error while adding model {ModelName}", dto.ModelName);
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
                 return View(dto);
             }
         }

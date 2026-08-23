@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using DistriHub.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +29,12 @@ if (string.IsNullOrWhiteSpace(jwtKey))
     throw new InvalidOperationException("Configuration error: Jwt:Key is missing. Provide a Base64-encoded 32-byte (or larger) key in configuration.");
 
 byte[] jwtKeyBytes;
-try { jwtKeyBytes = Convert.FromBase64String(jwtKey); } catch { jwtKeyBytes = Encoding.UTF8.GetBytes(jwtKey); }
+try { jwtKeyBytes = Convert.FromBase64String(jwtKey); }
+catch (FormatException)
+{
+    // Jwt:Key is not base64 - treat as raw UTF8 string
+    jwtKeyBytes = Encoding.UTF8.GetBytes(jwtKey);
+}
 if (jwtKeyBytes.Length < 32)
     throw new InvalidOperationException($"Configuration error: Jwt:Key is too short ({jwtKeyBytes.Length} bytes). It must be at least 32 bytes (256 bits). Use a Base64-encoded 32-byte key or a UTF-8 secret >= 32 chars.");
 
@@ -81,6 +87,13 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddAuthorization();
+
+// Add simple file-based logger (writes warnings and errors to Logs/*.txt)
+builder.Logging.AddFileLogger(options =>
+{
+    options.LogDirectory = System.IO.Path.Combine(builder.Environment.ContentRootPath, "Logs");
+    options.FileNamePrefix = "distrihub";
+});
 
 var app = builder.Build();
 
@@ -162,7 +175,11 @@ namespace DistriHub.Middleware
                 var audience = _config.GetValue<string>("Jwt:Audience");
                 byte[] _middlewareKeyBytes;
                 try { _middlewareKeyBytes = Convert.FromBase64String(key); }
-                catch { _middlewareKeyBytes = System.Text.Encoding.UTF8.GetBytes(key); }
+                catch (FormatException)
+                {
+                    // Key not base64 - fall back to UTF8 bytes
+                    _middlewareKeyBytes = System.Text.Encoding.UTF8.GetBytes(key);
+                }
 
                 if (_middlewareKeyBytes.Length < 32)
                     throw new InvalidOperationException($"Configuration error: Jwt:Key is too short ({_middlewareKeyBytes.Length} bytes). It must be at least 32 bytes (256 bits). Provide a Base64-encoded 32-byte key or a UTF-8 secret >= 32 chars.");
@@ -184,9 +201,9 @@ namespace DistriHub.Middleware
                 if (principal?.Identity != null && principal.Identity.IsAuthenticated)
                     context.User = principal;
             }
-            catch
+            catch (Exception)
             {
-                // ignore invalid token
+                // ignore invalid token (explicitly catch Exception to avoid swallowing non-exception errors)
             }
 
             await _next(context);

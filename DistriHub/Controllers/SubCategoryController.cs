@@ -11,10 +11,12 @@ namespace DistriHub.Controllers
     public class SubCategoryController : Controller
     {
         private readonly IRepository _repository;
+        private readonly Microsoft.Extensions.Logging.ILogger<SubCategoryController> _logger;
 
-        public SubCategoryController(IRepository repository)
+        public SubCategoryController(IRepository repository, Microsoft.Extensions.Logging.ILogger<SubCategoryController> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -58,12 +60,14 @@ namespace DistriHub.Controllers
             }
             catch (SqlException sqlEx)
             {
-                ModelState.AddModelError(string.Empty, "Unable to save subcategory: " + sqlEx.Message);
+                _logger.LogError(sqlEx, "Failed to add subcategory {SubCategoryName} for Category {CategoryId}", dto.SubCategoryName, dto.CategoryId);
+                ModelState.AddModelError(string.Empty, "Unable to save subcategory.");
                 return View(dto);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred: " + ex.Message);
+                _logger.LogError(ex, "Unexpected error while adding subcategory {SubCategoryName}", dto.SubCategoryName);
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
                 return View(dto);
             }
         }

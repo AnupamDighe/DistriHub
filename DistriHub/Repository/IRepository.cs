@@ -25,8 +25,10 @@ namespace DistriHub.Repository
         Task<Models.Model?> GetModelByIdAsync(int id);
 
         // Serial number validation / unfreeze operations
-        Task<int> ValidateSerialAsync(string materialCode, string serialNumber, string source, string accessCode);
-        Task<int> UnfreezeSerialAsync(string materialCode, string serialNumber, string source, string accessCode);
+        Task<int> ValidateSerialAsync(string materialCode, string serialNumber, string source);
+        Task<int> UnfreezeSerialAsync(string materialCode, string serialNumber, string source);
         Task<string?> GetPasswordByUsernameAsync(string username);
+        Task SetRefreshTokenAsync(string username, string refreshToken, DateTime expiry);
+        Task<(string? RefreshToken, DateTime? Expiry)> GetRefreshTokenAsync(string username);
     }
 }
