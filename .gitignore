@@ -1,11 +1,30 @@
-# Ignore Visual Studio cache
+# Ignore Visual Studio / IDE files
 .vs/
+.vscode/
 *.user
 *.suo
-*.log
-*.obj
-*.exe
-*.dll
+*.userosscache
+
+# Build outputs
 bin/
 obj/
+**/bin/
+**/obj/
+publish/
+artifacts/
+
+# Rider
+.idea/
+
+# NuGet
+*.nupkg
+*.snupkg
+
+# Logs
+*.log
+
+# OS
+*.DS_Store
+
+# Packages
 packages/
