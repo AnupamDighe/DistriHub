@@ -512,9 +512,9 @@ C:\MyPC\Application\My Application\Web Application\DistriHub\DistriHub\DistriHub
 C:\MyPC\Application\My Application\Web Application\DistriHub\DistriHub\DistriHub\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\MyPC\Application\My Application\Web Application\DistriHub\DistriHub\DistriHub\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
 C:\MyPC\Application\My Application\Web Application\DistriHubMikashi\DistriHub\bin\Debug\net10.0\appsettings.Development.json
-C:\MyPC\Application\My Application\Web Application\DistriHubMikashi\DistriHub\bin\Debug\net10.0\DistriHub.staticwebassets.endpoints.json
 C:\MyPC\Application\My Application\Web Application\DistriHubMikashi\DistriHub\bin\Debug\net10.0\appsettings.json
 C:\MyPC\Application\My Application\Web Application\DistriHubMikashi\DistriHub\bin\Debug\net10.0\DistriHub.staticwebassets.runtime.json
+C:\MyPC\Application\My Application\Web Application\DistriHubMikashi\DistriHub\bin\Debug\net10.0\DistriHub.staticwebassets.endpoints.json
 C:\MyPC\Application\My Application\Web Application\DistriHubMikashi\DistriHub\bin\Debug\net10.0\DistriHub.exe
 C:\MyPC\Application\My Application\Web Application\DistriHubMikashi\DistriHub\bin\Debug\net10.0\DistriHub.deps.json
 C:\MyPC\Application\My Application\Web Application\DistriHubMikashi\DistriHub\bin\Debug\net10.0\DistriHub.runtimeconfig.json

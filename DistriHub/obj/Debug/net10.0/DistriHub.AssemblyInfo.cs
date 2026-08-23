@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DistriHub")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f1c3c534e2a7b584f89dd3ccc22453c810d97899")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+88fd9beaf6b290f98ec45ba119f9e9004ebfc240")]
 [assembly: System.Reflection.AssemblyProductAttribute("DistriHub")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DistriHub")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
