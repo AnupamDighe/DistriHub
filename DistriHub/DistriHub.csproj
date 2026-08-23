@@ -1,0 +1,147 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\alerts.html" Link="Views\alerts.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\blank-page.html" Link="Views\blank-page.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\buttons.html" Link="Views\buttons.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\cards.html" Link="Views\cards.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\form-elements.html" Link="Views\form-elements.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\icons.html" Link="Views\icons.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\index.html" Link="Views\index.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\invoice.html" Link="Views\invoice.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\mdi-icons.html" Link="Views\mdi-icons.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\notification.html" Link="Views\notification.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\settings.html" Link="Views\settings.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\signin.html" Link="Views\signin.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\signup.html" Link="Views\signup.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\tables.html" Link="Views\tables.html" />
+    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\typography.html" Link="Views\typography.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\assets\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\assets\css\bootstrap.min.css" />
+    <None Include="wwwroot\assets\css\fullcalendar.css" />
+    <None Include="wwwroot\assets\css\lineicons.css" />
+    <None Include="wwwroot\assets\css\loading-bar.min.css" />
+    <None Include="wwwroot\assets\css\main.css" />
+    <None Include="wwwroot\assets\css\materialdesignicons.min.css" />
+    <None Include="wwwroot\assets\css\morris.css" />
+    <None Include="wwwroot\assets\fonts\lineicons.eot" />
+    <None Include="wwwroot\assets\fonts\lineicons.svg" />
+    <None Include="wwwroot\assets\fonts\lineicons.ttf" />
+    <None Include="wwwroot\assets\fonts\lineicons.woff" />
+    <None Include="wwwroot\assets\fonts\lineicons.woff2" />
+    <None Include="wwwroot\assets\fonts\materialdesignicons-webfont.eot" />
+    <None Include="wwwroot\assets\fonts\materialdesignicons-webfont.ttf" />
+    <None Include="wwwroot\assets\fonts\materialdesignicons-webfont.woff" />
+    <None Include="wwwroot\assets\fonts\materialdesignicons-webfont.woff2" />
+    <None Include="wwwroot\assets\images\auth\reset-password.svg" />
+    <None Include="wwwroot\assets\images\auth\shape.svg" />
+    <None Include="wwwroot\assets\images\auth\signin-image.svg" />
+    <None Include="wwwroot\assets\images\auth\signup-image.svg" />
+    <None Include="wwwroot\assets\images\cards\card-style-1\admin-1.png" />
+    <None Include="wwwroot\assets\images\cards\card-style-1\admin-2.png" />
+    <None Include="wwwroot\assets\images\cards\card-style-1\admin-3.png" />
+    <None Include="wwwroot\assets\images\cards\card-style-1\card-1.jpg" />
+    <None Include="wwwroot\assets\images\cards\card-style-1\card-2.jpg" />
+    <None Include="wwwroot\assets\images\cards\card-style-1\card-3.jpg" />
+    <None Include="wwwroot\assets\images\cards\card-style-2\card-1.jpg" />
+    <None Include="wwwroot\assets\images\cards\card-style-2\card-2.jpg" />
+    <None Include="wwwroot\assets\images\cards\card-style-2\card-3.jpg" />
+    <None Include="wwwroot\assets\images\cards\card-style-4\card-1.png" />
+    <None Include="wwwroot\assets\images\cards\card-style-4\card-2.png" />
+    <None Include="wwwroot\assets\images\cards\card-style-4\card-3.png" />
+    <None Include="wwwroot\assets\images\cards\card-style-5\card-1.jpg" />
+    <None Include="wwwroot\assets\images\cards\card-style-5\card-2.jpg" />
+    <None Include="wwwroot\assets\images\cards\card-style-6\card-1.jpg" />
+    <None Include="wwwroot\assets\images\cards\card-style-6\card-2.jpg" />
+    <None Include="wwwroot\assets\images\cards\card-style-6\card-3.jpg" />
+    <None Include="wwwroot\assets\images\cards\card-style-6\card-4.jpg" />
+    <None Include="wwwroot\assets\images\clients\client-profile.png" />
+    <None Include="wwwroot\assets\images\clients\clients-cover.jpg" />
+    <None Include="wwwroot\assets\images\favicon.svg" />
+    <None Include="wwwroot\assets\images\invoice\uideck-logo.svg" />
+    <None Include="wwwroot\assets\images\lead\lead-1.png" />
+    <None Include="wwwroot\assets\images\lead\lead-2.png" />
+    <None Include="wwwroot\assets\images\lead\lead-3.png" />
+    <None Include="wwwroot\assets\images\lead\lead-4.png" />
+    <None Include="wwwroot\assets\images\lead\lead-5.png" />
+    <None Include="wwwroot\assets\images\lead\lead-6.png" />
+    <None Include="wwwroot\assets\images\logo\logo-2.svg" />
+    <None Include="wwwroot\assets\images\logo\logo-icon-big.svg" />
+    <None Include="wwwroot\assets\images\logo\logo-white.svg" />
+    <None Include="wwwroot\assets\images\logo\logo.svg" />
+    <None Include="wwwroot\assets\images\modals\image-1.svg" />
+    <None Include="wwwroot\assets\images\products\product-mini-1.jpg" />
+    <None Include="wwwroot\assets\images\products\product-mini-2.jpg" />
+    <None Include="wwwroot\assets\images\products\product-mini-3.jpg" />
+    <None Include="wwwroot\assets\images\products\product-mini-4.jpg" />
+    <None Include="wwwroot\assets\images\products\product-mini-5.jpg" />
+    <None Include="wwwroot\assets\images\profile\profile-1.png" />
+    <None Include="wwwroot\assets\images\profile\profile-cover.jpg" />
+    <None Include="wwwroot\assets\images\profile\profile-image.png" />
+    <None Include="wwwroot\assets\images\profile\profile.png" />
+    <None Include="wwwroot\assets\images\projects\image-1.png" />
+    <None Include="wwwroot\assets\images\projects\image-2.png" />
+    <None Include="wwwroot\assets\images\projects\image-3.png" />
+    <None Include="wwwroot\assets\js\bootstrap.bundle.min.js" />
+    <None Include="wwwroot\assets\js\Chart.min.js" />
+    <None Include="wwwroot\assets\js\dynamic-pie-chart.js" />
+    <None Include="wwwroot\assets\js\fullcalendar.js" />
+    <None Include="wwwroot\assets\js\jvectormap.min.js" />
+    <None Include="wwwroot\assets\js\loading-bar.min.js" />
+    <None Include="wwwroot\assets\js\main.js" />
+    <None Include="wwwroot\assets\js\moment.min.js" />
+    <None Include="wwwroot\assets\js\polyfill.js" />
+    <None Include="wwwroot\assets\js\world-merc.js" />
+    <None Include="wwwroot\assets\scss\alerts\_alerts.scss" />
+    <None Include="wwwroot\assets\scss\auth\_signin.scss" />
+    <None Include="wwwroot\assets\scss\auth\_signup.scss" />
+    <None Include="wwwroot\assets\scss\buttons\_buttons.scss" />
+    <None Include="wwwroot\assets\scss\calendar\_calendar.scss" />
+    <None Include="wwwroot\assets\scss\cards\_cards.scss" />
+    <None Include="wwwroot\assets\scss\dashboards\_dashboards.scss" />
+    <None Include="wwwroot\assets\scss\forms\_form-elements.scss" />
+    <None Include="wwwroot\assets\scss\header\_header.scss" />
+    <None Include="wwwroot\assets\scss\icons\_icons.scss" />
+    <None Include="wwwroot\assets\scss\invoice\_invoice.scss" />
+    <None Include="wwwroot\assets\scss\main.scss" />
+    <None Include="wwwroot\assets\scss\notification\_notification.scss" />
+    <None Include="wwwroot\assets\scss\settings\_settings.scss" />
+    <None Include="wwwroot\assets\scss\tables\_tables.scss" />
+    <None Include="wwwroot\assets\scss\typography\_typography.scss" />
+    <None Include="wwwroot\assets\scss\_common.scss" />
+    <None Include="wwwroot\assets\scss\_default.scss" />
+    <None Include="wwwroot\assets\scss\_mixin.scss" />
+    <None Include="wwwroot\assets\scss\_preloader.scss" />
+    <None Include="wwwroot\assets\scss\_sidebar.scss" />
+    <None Include="wwwroot\assets\scss\_variables.scss" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
+    <PackageReference Include="ExcelDataReader" Version="3.7.0" />
+    <PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0" />
+    <PackageReference Include="Azure.Identity" Version="1.11.4" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Jwt helper files removed or embedded in Program.cs; remove explicit compile references -->
+  </ItemGroup>
+
+  <!-- Patch noop: position end -->
+</Project>

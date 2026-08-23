@@ -1,0 +1,467 @@
+﻿@{
+    ViewData["Title"] = "Upload File";
+}
+<!-- ========== tab components start ========== -->
+<section class="tab-components">
+    <div class="container-fluid">
+        <!-- ========== title-wrapper start ========== -->
+        <div class="title-wrapper pt-30">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="title">
+                        <h2>Upload File</h2>
+                    </div>
+                </div>
+                <!-- end col -->
+                <div class="col-md-6">
+                    <div class="breadcrumb-wrapper">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item">
+                                    <a href="#0">Dashboard</a>
+                                </li>
+                                @* <li class="breadcrumb-item"><a href="#0">Forms</a></li> *@
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    Upload File
+                                </li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <!-- end col -->
+            </div>
+            <!-- end row -->
+        </div>
+        <!-- ========== title-wrapper end ========== -->
+        <!-- ========== form-elements-wrapper start ========== -->
+        <div class="form-elements-wrapper">
+            <div class="row">
+                <div class="col-lg-6">
+                    <!-- input style start -->
+                    <div class="card-style mb-30">
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger">
+                                @Html.ValidationSummary()
+                            </div>
+                        }
+                        @if (ViewBag.Message != null)
+                        {
+                            <div id="successMessage" class="alert alert-success">@ViewBag.Message</div>
+                            @if (ViewBag.UploadPath != null)
+                            {
+                                <div>Saved to: <a href="@Url.Content("~/" + ViewBag.UploadPath)">@ViewBag.UploadPath</a></div>
+                            }
+                        }
+                        <!-- mapping select moved inside form so it posts with file -->
+                        <form id="uploadForm" asp-action="FileUpload" method="post" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+                            <div class="select-style-1">
+                                <label>Mapping</label>
+                                <div class="select-position">
+                                    <select id="mappingSelect">
+                                        <option value="0">--Select Mapping--</option>
+                                        <option value="1">Serial No</option>
+                                        <option value="2">Distributors</option>
+                                        <option value="3">Dealer</option>
+                                        <option value="4">Installation</option>
+                                    </select>
+                                    <input type="hidden" id="mappingHidden" name="mapping" value="0" />
+                                    <div id="mappingError" class="text-danger" style="display:none;margin-top:5px;"></div>
+                                </div>
+                            </div>
+
+                            <div class="input-style-1">
+                                <label>Upload Excel File</label>
+                                <input type="file" id="uploadFile" name="uploadFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="validateFile(this)" />
+                                <div id="fileError" class="text-danger" style="display:none;margin-top:5px;"></div>
+                            </div>
+                            <!-- end input -->
+                            <div class="input-style-2">
+                                <button type="submit" id="uploadBtn" class="main-btn primary-btn rounded-full btn-hover">Upload File</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- end card -->
+                </div>
+                <div class="col-lg-6">
+                    <!-- input style start -->
+                    <div class="card-style mb-30">
+                        <div class="input-style-1">
+                            <label>Download File Format</label>
+                        </div>
+                        <!-- end input -->
+                        <div class="input-style-2">
+                            <a href="#" id="downloadTemplateBtn" class="main-btn primary-btn rounded-full btn-hover">Download File Format to Upload</a>
+                        </div>
+
+                        <script>
+                                                    (function() {
+                                                        var btn = document.getElementById('downloadTemplateBtn');
+                                                        if (!btn) return;
+                                                        btn.addEventListener('click', function(e) {
+                                                            e.preventDefault();
+                                                            // Exact filename in wwwroot/Files - update if your filename differs
+                                                            var filename = 'Archon Distributors excel sheet format.xlsx';
+                                                            var url = '/Files/' + encodeURIComponent(filename);
+
+                                                            // Use fetch to retrieve the file and force a download from the browser
+                                                            fetch(url).then(function(resp) {
+                                                                if (!resp.ok) {
+                                                                    alert('Template not found on server.');
+                                                                    return null;
+                                                                }
+                                                                return resp.blob();
+                                                            }).then(function(blob) {
+                                                                if (!blob) return;
+                                                                var link = document.createElement('a');
+                                                                var objectUrl = URL.createObjectURL(blob);
+                                                                link.href = objectUrl;
+                                                                link.download = filename;
+                                                                document.body.appendChild(link);
+                                                                link.click();
+                                                                setTimeout(function() {
+                                                                    URL.revokeObjectURL(objectUrl);
+                                                                    link.remove();
+                                                                }, 500);
+                                                            }).catch(function(err) {
+                                                                console.error('Download failed', err);
+                                                                alert('Download failed. Check browser console for details.');
+                                                            });
+                                                        }, false);
+                                                    })();
+                        </script>
+                    </div>
+                    <!-- end card -->
+                </div>
+            </div>
+            <!-- end row -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card-style mb-30">
+                        @{
+                            var mapping = ViewBag.Mapping as string;
+                            var duplicates = ViewBag.Duplicates as List<DistriHub.Models.DuplicateSerial>;
+                            var missingSerials = ViewBag.MissingSerials as List<DistriHub.Models.MissingSerialNo>;
+                            var installationAlreadyDone = ViewBag.InstallationAlreadyDone as System.Collections.IEnumerable;
+                            var distributorMismatchFromExcelAndDB = ViewBag.DistributorMismatchFromExcelAndDB as List<DistriHub.Models.DistributorMismatch>;
+                        }
+
+                        @* Mapping 1: show duplicates *@
+                        @if (mapping == "1" && duplicates != null && duplicates.Count > 0)
+                        {
+                            <h5>Duplicate Serial No. in Serial No. Sheet</h5>
+                            <table id="duplicatesTable" class="display" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Model</th>
+                                        <th>Serial No</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var d in duplicates)
+                                    {
+                                        <tr>
+                                            <td>@d.ModelName</td>
+                                            <td>@d.SerialNo</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
+                        @* Missing Serial No in Dealer Sheet *@
+                        @if (mapping == "3" && missingSerials != null)
+                        {
+                            <h5>Missing Serial No in Dealer Sheet</h5>
+                            <table id="duplicatesTable" class="display" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>SerialNo</th>
+                                        <th>Distributor</th>
+                                        <th>Dealer</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var d in missingSerials)
+                                    {
+                                        <tr>
+                                            <td>@d.SerialNo</td>
+                                            <td>@d.Distributor</td>
+                                            <td>@d.Dealer</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
+                        @* Distributor Mismatch From Excel and DB in Dealer Sheet *@
+                        @if ((mapping == "3") && distributorMismatchFromExcelAndDB != null && distributorMismatchFromExcelAndDB.Count > 0)
+                        {
+                            <h5>Distributor Mismatches From Excel and Database in Dealer Sheet</h5>
+                            <table id="duplicatesTable" class="display" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>SerialNo</th>
+                                        <th>Distributor</th>
+                                        <th>Dealer</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var d in distributorMismatchFromExcelAndDB)
+                                    {
+                                        <tr>
+                                            <td>@d.SerialNo</td>
+                                            <td>@d.Distributor</td>
+                                            <td>@d.Dealer</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
+                        @* Mapping 2 show missing serials *@
+                        @if ((mapping == "2") && missingSerials != null && missingSerials.Count > 0)
+                        {
+                            <h5>Missing Serials</h5>
+                            <table id="missingTable" class="display" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Serial No</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var s in missingSerials)
+                                    {
+                                        <tr>
+                                            <td>@s</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
+                        @* Mapping 4: show installation already done rows *@
+                        @if ((mapping == "4") && installationAlreadyDone != null)
+                        {
+                            <h5>Installation Already Done</h5>
+                            <table id="installationDoneTable" class="display" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Serial No</th>
+                                        <th>Installation</th>
+                                        <th>Installation Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (dynamic row in installationAlreadyDone)
+                                    {
+                                        <tr>
+                                            <td>@(row?.Serial ?? "")</td>
+                                            <td>@(row?.Installation ?? "")</td>
+                                            <td>@(row?.InstallationDate ?? "")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ========== form-elements-wrapper end ========== -->
+    </div>
+    <!-- end container -->
+</section>
+<!-- ========== tab components end ========== -->
+
+<script>
+    (function() {
+        var uploadBtn = document.getElementById('uploadBtn');
+        var fileError = document.getElementById('fileError');
+        var mappingSelect = document.getElementById('mappingSelect');
+        var mappingError = document.getElementById('mappingError');
+        var uploadForm = document.getElementById('uploadForm');
+
+        window.validateFile = function(input) {
+            if (!fileError || !uploadBtn) return;
+            fileError.style.display = 'none';
+            if (!input || !input.files || input.files.length === 0) {
+                uploadBtn.disabled = false;
+                return;
+            }
+            var file = input.files[0];
+            var name = (file.name || '').toLowerCase();
+            if (!name.endsWith('.xlsx')) {
+                fileError.textContent = 'Invalid file type. Only .xlsx files are allowed.';
+                fileError.style.display = 'block';
+                uploadBtn.disabled = true;
+                try { input.value = ''; } catch (e) { }
+            } else {
+                fileError.style.display = 'none';
+                uploadBtn.disabled = false;
+            }
+        };
+
+        if (mappingSelect) {
+            mappingSelect.addEventListener('change', function() {
+                if (mappingError) mappingError.style.display = 'none';
+                var hidden = document.getElementById('mappingHidden');
+                if (hidden) hidden.value = mappingSelect.value;
+            });
+        }
+
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function(e) {
+                var hasError = false;
+                // Sync mapping value to hidden input and validate selection before submit
+                var hidden = document.getElementById('mappingHidden');
+                if (mappingSelect && hidden) {
+                    hidden.value = mappingSelect.value;
+                }
+
+                if (mappingSelect) {
+                    if (mappingSelect.value === '0') {
+                        if (mappingError) {
+                            mappingError.textContent = 'Please select a mapping before uploading file.';
+                            mappingError.style.display = 'block';
+                        }
+                        try { mappingSelect.focus(); } catch (ex) { }
+                        hasError = true;
+                    }
+                }
+
+                // Ensure file is selected and valid
+                var fileInput = document.getElementById('uploadFile');
+                if (fileInput) {
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                        if (fileError) {
+                            fileError.textContent = 'Please select a .xlsx file to upload.';
+                            fileError.style.display = 'block';
+                        }
+                        hasError = true;
+                    } else {
+                        var fn = (fileInput.files[0].name || '').toLowerCase();
+                        if (!fn.endsWith('.xlsx')) {
+                            if (fileError) {
+                                fileError.textContent = 'Invalid file type. Only .xlsx files are allowed.';
+                                fileError.style.display = 'block';
+                            }
+                            hasError = true;
+                        }
+                    }
+                }
+
+                if (hasError) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
+    })();
+</script>
+
+<script>
+    // Auto-dismiss success message after 4 seconds
+    (function() {
+        try {
+            var el = document.getElementById('successMessage');
+            if (!el) return;
+            setTimeout(function() {
+                try {
+                    el.style.transition = 'opacity 0.5s ease';
+                    el.style.opacity = '0';
+                    setTimeout(function() { if (el && el.parentNode) el.parentNode.removeChild(el); }, 500);
+                } catch (e) { if (el && el.parentNode) el.parentNode.removeChild(el); }
+            }, 4000);
+        } catch (e) { /* ignore */ }
+    })();
+</script>
+
+<!-- DataTables CSS for duplicates export -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+
+<!-- Load jQuery/DataTables sequentially and initialize only after all scripts are available. This avoids "DataTable is not a function" if scripts fail to load or load out-of-order. -->
+<script>
+    (function() {
+        function loadScript(src, cb) {
+            var s = document.createElement('script');
+            s.src = src;
+            s.async = false;
+            s.onload = function() { cb && cb(null); };
+            s.onerror = function() { console.error('Failed to load ' + src); cb && cb(new Error('load failed')); };
+            document.head.appendChild(s);
+        }
+
+        function initDataTable() {
+            try {
+                if (typeof jQuery === 'undefined') {
+                    console.error('jQuery is not available');
+                    return;
+                }
+                if (!jQuery.fn || !jQuery.fn.DataTable) {
+                    console.error('DataTables plugin is not available');
+                    return;
+                }
+
+                // initialize duplicates table
+                if (document.querySelector('#duplicatesTable')) {
+                    jQuery('#duplicatesTable').DataTable({
+                        dom: 'Bfrtip',
+                        buttons: [
+                            { extend: 'excelHtml5', title: 'DuplicateSerialNo', exportOptions: { columns: [0, 1] } }
+                        ]
+                    });
+                }
+
+                // initialize missing serials table
+                if (document.querySelector('#missingTable')) {
+                    jQuery('#missingTable').DataTable({
+                        dom: 'Bfrtip',
+                        buttons: [
+                            { extend: 'excelHtml5', title: 'MissingSerials', exportOptions: { columns: [0] } }
+                        ]
+                    });
+                }
+
+                // initialize installation already done table
+                if (document.querySelector('#installationDoneTable')) {
+                    jQuery('#installationDoneTable').DataTable({
+                        dom: 'Bfrtip',
+                        buttons: [
+                            { extend: 'excelHtml5', title: 'InstallationAlreadyDone', exportOptions: { columns: [0, 1, 2] } }
+                        ]
+                    });
+                }
+            } catch (e) {
+                console.error('Error initializing DataTable', e);
+            }
+        }
+
+        // If jQuery is missing, try to load it first, otherwise proceed to load DataTables plugins.
+        var chain = function() {
+            loadScript('https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js', function() {
+                loadScript('https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js', function() {
+                    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', function() {
+                        loadScript('https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js', function() {
+                            initDataTable();
+                        });
+                    });
+                });
+            });
+        };
+
+        if (typeof jQuery === 'undefined') {
+            loadScript('https://code.jquery.com/jquery-3.7.0.min.js', function(err) {
+                if (err) {
+                    console.error('Failed to load jQuery from CDN');
+                    return;
+                }
+                chain();
+            });
+        } else {
+            chain();
+        }
+    })();
+</script>

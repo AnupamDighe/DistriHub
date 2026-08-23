@@ -1,0 +1,133 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "DistriHub API",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/Auth/token": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/SerialNo": {
+      "post": {
+        "tags": [
+          "SerialNo"
+        ],
+        "parameters": [
+          {
+            "name": "op",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SerialNoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SerialNoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SerialNoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuthRequest": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "nullable": true
+          },
+          "accessCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SerialNoRequest": {
+        "type": "object",
+        "properties": {
+          "materialCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "serialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "type": "string",
+            "nullable": true
+          },
+          "accessCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Enter 'Bearer {token}'",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}

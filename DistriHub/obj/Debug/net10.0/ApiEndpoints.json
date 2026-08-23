@@ -1,0 +1,39 @@
+[
+  {
+    "ContainingType": "DistriHub.Controllers.AuthController",
+    "Method": "Token",
+    "RelativePath": "api/Auth/token",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "DistriHub.Controllers.AuthRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "DistriHub.Controllers.SerialNoController",
+    "Method": "Post",
+    "RelativePath": "api/SerialNo",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "op",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "request",
+        "Type": "DistriHub.Models.SerialNoRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

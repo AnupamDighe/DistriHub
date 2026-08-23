@@ -1,0 +1,112 @@
+@model DistriHub.Models.SubCategoryDto
+
+@{
+    ViewData["Title"] = "Create SubCategory";
+}
+
+<section class="tab-components">
+    <div class="container-fluid">
+        <div class="title-wrapper pt-30">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="title">
+                        <h2>Create SubCategory</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-elements-wrapper">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card-style mb-30">
+                        <form asp-action="Create" asp-controller="SubCategory" method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            @if (ViewData["SuccessMessage"] != null)
+                            {
+                                <div class="alert alert-success" role="alert">@ViewData["SuccessMessage"]</div>
+                            }
+
+                            <div class="select-style-1">
+                                <label asp-for="CategoryId" class="control-label"></label>
+                                <div class="select-position">
+                                <select asp-for="CategoryId" asp-items="@(ViewData["Categories"] as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)">
+                                    <option value="">-- Select Category --</option>
+                                </select>
+                                </div>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            </div>
+
+                            <div class="input-style-1">
+                                <label asp-for="SubCategoryName" class="control-label"></label>
+                                <input asp-for="SubCategoryName" class="form-control" />
+                                <span asp-validation-for="SubCategoryName" class="text-danger"></span>
+                            </div>
+
+                            <div class="input-style-1">
+                                <button type="submit" class="main-btn primary-btn rounded-full btn-hover">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (function ($) {
+            if (typeof $ === 'undefined' || !$.validator) return;
+
+            $(function () {
+                var $name = $('#SubCategoryName');
+                var $category = $('#CategoryId');
+                if (!$name.length || !$category.length) return;
+
+                var debounceTimer;
+                var debounceDelay = 500;
+
+                function validateField() {
+                    if ($name.closest('form').length) {
+                        $name.valid();
+                    }
+                }
+
+                $name.on('input', function () {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(validateField, debounceDelay);
+                });
+
+                $name.on('keyup blur change', function () {
+                    setTimeout(function () {
+                        if ($name.hasClass('input-validation-error')) {
+                            $name.removeClass('is-valid').addClass('is-invalid');
+                        } else if ($name.val().trim().length > 0) {
+                            $name.removeClass('is-invalid').addClass('is-valid');
+                        } else {
+                            $name.removeClass('is-valid is-invalid');
+                        }
+                    }, 150);
+                });
+
+                $name.closest('form').on('reset', function () {
+                    $name.removeClass('is-valid is-invalid');
+                });
+            });
+        })(window.jQuery);
+    </script>
+
+    <script>
+        // Auto-hide success alert
+        (function ($) {
+            $(function () {
+                var $alert = $('.alert.alert-success');
+                if (!$alert.length) return;
+                setTimeout(function () {
+                    $alert.fadeTo(500, 0).slideUp(500, function () { $(this).remove(); });
+                }, 3000);
+            });
+        })(window.jQuery);
+    </script>
+}

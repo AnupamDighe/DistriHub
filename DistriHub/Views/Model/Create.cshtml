@@ -1,0 +1,143 @@
+@model DistriHub.Models.ModelDto
+
+@{
+    ViewData["Title"] = "Create Model";
+}
+
+<section class="tab-components">
+    <div class="container-fluid">
+        <div class="title-wrapper pt-30">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="title">
+                        <h2>Create Model</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-elements-wrapper">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card-style mb-30">
+                        <form asp-action="Create" asp-controller="Model" method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            @if (ViewData["SuccessMessage"] != null)
+                            {
+                                <div class="alert alert-success" role="alert">@ViewData["SuccessMessage"]</div>
+                            }
+
+                            <div class="select-style-1">
+                                <label asp-for="CategoryId" class="control-label"></label>
+                                <div class="select-position">
+                                <select asp-for="CategoryId" id="CategoryId" asp-items="@(ViewData["Categories"] as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)">
+                                    <option value="">-- Select Category --</option>
+                                </select>
+                                </div>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            </div>
+
+                            <div class="select-style-1">
+                                <label asp-for="SubCategoryId" class="control-label"></label>
+                                <div class="select-position">
+                                <select asp-for="SubCategoryId" id="SubCategoryId" asp-items="@(ViewData["SubCategories"] as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)">
+                                    <option value="">-- Select SubCategory --</option>
+                                </select>
+                                </div>
+                                <span asp-validation-for="SubCategoryId" class="text-danger"></span>
+                            </div>
+
+                            <div class="input-style-1">
+                                <label asp-for="ModelName" class="control-label"></label>
+                                <input asp-for="ModelName" class="form-control" id="ModelName" />
+                                <span asp-validation-for="ModelName" class="text-danger"></span>
+                            </div>
+
+                            <div class="input-style-1">
+                                <button type="submit" class="main-btn primary-btn rounded-full btn-hover">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (function ($) {
+            if (typeof $ === 'undefined' || !$.validator) return;
+
+            $(function () {
+                var $model = $('#ModelName');
+                var $category = $('#CategoryId');
+                var $sub = $('#SubCategoryId');
+
+                if (!$model.length) return;
+
+                var debounceTimer;
+                var debounceDelay = 500;
+
+                function validateField() {
+                    if ($model.closest('form').length) {
+                        $model.valid();
+                    }
+                }
+
+                $model.on('input', function () {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(validateField, debounceDelay);
+                });
+
+                $model.on('keyup blur change', function () {
+                    setTimeout(function () {
+                        if ($model.hasClass('input-validation-error')) {
+                            $model.removeClass('is-valid').addClass('is-invalid');
+                        } else if ($model.val().trim().length > 0) {
+                            $model.removeClass('is-invalid').addClass('is-valid');
+                        } else {
+                            $model.removeClass('is-valid is-invalid');
+                        }
+                    }, 150);
+                });
+
+                $model.closest('form').on('reset', function () {
+                    $model.removeClass('is-valid is-invalid');
+                });
+
+                // When category changes load subcategories
+                $category.on('change', function () {
+                    var catId = $category.val();
+                    if (!catId) {
+                        $sub.empty().append('<option value="">-- Select SubCategory --</option>');
+                        return;
+                    }
+
+                    fetch('/Model/GetSubCategories?categoryId=' + encodeURIComponent(catId))
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                            $sub.empty().append('<option value="">-- Select SubCategory --</option>');
+                            data.forEach(function (item) {
+                                $sub.append($('<option>').val(item.id).text(item.text));
+                            });
+                        })
+                        .catch(function (err) { console.error(err); });
+                });
+            });
+        })(window.jQuery);
+    </script>
+
+    <script>
+        // Auto-hide success alert
+        (function ($) {
+            $(function () {
+                var $alert = $('.alert.alert-success');
+                if (!$alert.length) return;
+                setTimeout(function () {
+                    $alert.fadeTo(500, 0).slideUp(500, function () { $(this).remove(); });
+                }, 3000);
+            });
+        })(window.jQuery);
+    </script>
+}

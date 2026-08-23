@@ -1,0 +1,131 @@
+@model DistriHub.Models.CategoryDto
+
+@{
+    ViewData["Title"] = "Create Category";
+}
+<!-- ========== tab components start ========== -->
+<section class="tab-components">
+    <div class="container-fluid">
+        <!-- ========== title-wrapper start ========== -->
+        <div class="title-wrapper pt-30">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="title">
+                        <h2>Create Category</h2>
+                    </div>
+                </div>
+                <!-- end col -->
+                <div class="col-md-6">
+                    <div class="breadcrumb-wrapper">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item">
+                                    <a href="#0">Dashboard</a>
+                                </li>
+                                @* <li class="breadcrumb-item"><a href="#0">Forms</a></li> *@
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    Create Category
+                                </li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <!-- end col -->
+            </div>
+            <!-- end row -->
+        </div>
+        <!-- ========== title-wrapper end ========== -->
+        <!-- ========== form-elements-wrapper start ========== -->
+        <div class="form-elements-wrapper">
+            <div class="row">
+                <div class="col-lg-6">
+                    <!-- input style start -->
+                    <div class="card-style mb-30">
+                        <form asp-action="Create" asp-controller="Category" method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            @if (ViewData["SuccessMessage"] != null)
+                            {
+                                <div class="alert alert-success" role="alert">@ViewData["SuccessMessage"]</div>
+                            }
+                            <div class="input-style-1">
+                                <label asp-for="CategoryName" class="control-label"></label>
+                                <input asp-for="CategoryName" class="form-control" />
+                                <span asp-validation-for="CategoryName" class="text-danger"></span>
+                            </div>
+                            <!-- end input -->
+                            <div class="input-style-1">
+                                <button type="submit" class="main-btn primary-btn rounded-full btn-hover">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- end card -->
+                </div>
+            </div>
+            <!-- end row -->
+        </div>
+        <!-- ========== form-elements-wrapper end ========== -->
+    </div>
+    <!-- end container -->
+</section>
+<!-- ========== tab components end ========== -->
+
+@section Scripts {
+    <script>
+        (function ($) {
+            // Ensure jQuery and jQuery Validate are available
+            if (typeof $ === 'undefined' || !$.validator) return;
+
+            $(function () {
+                var $input = $('#CategoryName');
+                if (!$input.length) return;
+
+                var debounceTimer;
+                var debounceDelay = 500; // ms
+
+                // On input, debounce and trigger validation (which will call the Remote validator)
+                $input.on('input', function () {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function () {
+                        // Trigger jQuery Validate for this field
+                        if ($input.closest('form').length) {
+                            $input.valid();
+                        }
+                    }, debounceDelay);
+                });
+
+                // Update visual state after remote validation completes
+                // jQuery Validate will add/remove 'input-validation-error' class; use that to toggle bootstrap classes
+                $input.on('keyup blur change', function () {
+                    setTimeout(function () {
+                        if ($input.hasClass('input-validation-error')) {
+                            $input.removeClass('is-valid').addClass('is-invalid');
+                        } else if ($input.val().trim().length > 0) {
+                            $input.removeClass('is-invalid').addClass('is-valid');
+                        } else {
+                            $input.removeClass('is-valid is-invalid');
+                        }
+                    }, 150);
+                });
+
+                // Clear visual state when form is reset
+                $input.closest('form').on('reset', function () {
+                    $input.removeClass('is-valid is-invalid');
+                    window.setTimeout(function () { $input.next('.field-validation-error').text(''); }, 0);
+                });
+            });
+        })(window.jQuery);
+    </script>
+    <script>
+        // Auto-hide success alert after a few seconds
+        (function ($) {
+            $(function () {
+                var $alert = $('.alert.alert-success');
+                if (!$alert.length) return;
+                // Keep visible for 3s then fade out
+                setTimeout(function () {
+                    $alert.fadeTo(500, 0).slideUp(500, function () { $(this).remove(); });
+                }, 3000);
+            });
+        })(window.jQuery);
+    </script>
+}
