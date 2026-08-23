@@ -8,3 +8,4 @@
 *.dll
 bin/
 obj/
+packages/
