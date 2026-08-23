@@ -1,5 +1,9 @@
-﻿# Ignore Visual Studio cache
+﻿# Ignore this file itself (typo-named gitignore)
+.gitingnore
+
+# Ignore Visual Studio cache
 .vs/
+.vs/**
 *.user
 *.suo
 *.log
