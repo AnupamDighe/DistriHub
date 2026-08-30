@@ -5,13 +5,32 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="@Url.Content("~/assets/images/favicon.svg")" type="image/x-icon" />
-    <title>Archon Distributors </title>
-
+    <title>Mikashi</title>
+    @RenderSection("Styles", required: false)
     <!-- ========== All CSS files linkup ========= -->
     <link rel="stylesheet" href="@Url.Content("~/assets/css/bootstrap.min.css")" />
     <link rel="stylesheet" href="@Url.Content("~/assets/css/lineicons.css")" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="@Url.Content("~/assets/css/materialdesignicons.min.css")" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="@Url.Content("~/assets/css/main.css")" />
+    <style>
+        /* Brand name styling: bold, centered and responsive */
+        .brand-name {
+            display: block;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #ffd000; /* match existing yellow look from template */
+            line-height: 1;
+        }
+
+        @@media (min-width: 768px) {
+            .brand-name { font-size: 1.5rem; }
+        }
+
+        @@media (min-width: 1200px) {
+            .brand-name { font-size: 1.75rem; }
+        }
+    </style>
 </head>
 <body>
     <!-- ======== Preloader =========== -->
@@ -22,9 +41,7 @@
     <!-- ======== sidebar-nav start =========== -->
     <aside class="sidebar-nav-wrapper">
         <div class="navbar-logo">
-            <a asp-controller="Home" asp-action="Index">
-                <img src="@Url.Content("~/assets/images/logo/logo.svg")" alt="logo" />
-            </a>
+            <a class="brand-name">Mikashi</a>
         </div>
         <nav class="sidebar-nav">
             <ul>
@@ -78,16 +95,17 @@
                                 </button>
                             </div>
                             <div class="header-search d-none d-md-flex">
-                                <form action="#">
-                                    <input type="text" placeholder="Search..." />
-                                    <button><i class="lni lni-search-alt"></i></button>
+                                @* Search serial number - submits to SerialNoViewController.SerialNoList *@
+                                <form asp-controller="SerialNoView" asp-action="SerialNoList" method="get" class="d-flex">
+                                    <input name="serial" type="text" class="form-control" placeholder="Search serial..." />
+                                    <button type="submit" class="btn btn-outline-secondary ms-2"><i class="lni lni-search-alt"></i></button>
                                 </form>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-7 col-md-7 col-6">
                         <div class="header-right">
-                            <!-- notification start -->
+                            @* <!-- notification start -->
                             <div class="notification-box ml-15 d-none d-md-flex">
                                 <button class="dropdown-toggle" type="button" id="notification" data-bs-toggle="dropdown"
                                         aria-expanded="false">
@@ -194,7 +212,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            <!-- message end -->
+                            <!-- message end --> *@
                             <!-- profile start -->
                             <div class="profile-box ml-15">
                                 <button class="dropdown-toggle bg-transparent border-0" type="button" id="profile"
@@ -205,7 +223,7 @@
                                                 <img src="@Url.Content("~/assets/images/profile/profile-image.png")" alt="" />
                                             </div>
                                             <div>
-                                                <h6 class="fw-500">Adam Joe</h6>
+                                                <h6 class="fw-500">Vikrant Bora</h6>
                                                 <p>Admin</p>
                                             </div>
                                         </div>
@@ -218,8 +236,8 @@
                                                 <img src="@Url.Content("~/assets/images/profile/profile-image.png")" alt="image">
                                             </div>
                                             <div class="content">
-                                                <h4 class="text-sm">Adam Joe</h4>
-                                                <a class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white text-xs" href="#">Email@gmail.com</a>
+                                                <h4 class="text-sm">Vikrant Bora</h4>
+                                                <a class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white text-xs" href="#"></a>
                                             </div>
                                         </div>
                                     </li>
@@ -274,6 +292,40 @@
     <script src="@Url.Content("~/assets/js/world-merc.js")"></script>
     <script src="@Url.Content("~/assets/js/polyfill.js")"></script>
     <script src="@Url.Content("~/assets/js/main.js")"></script>
+    <script>
+        // Persist sidebar collapse state across page loads so submenus stay open once expanded
+        (function () {
+            var keyPrefix = 'sidebar-collapse-';
+            document.addEventListener('DOMContentLoaded', function () {
+                try {
+                    var collapses = document.querySelectorAll('.sidebar-nav .collapse');
+                    collapses.forEach(function (el) {
+                        if (!el.id) return;
+                        var key = keyPrefix + el.id;
+                        try {
+                            var state = localStorage.getItem(key);
+                            if (state === 'open') {
+                                var instance = bootstrap.Collapse.getInstance(el);
+                                if (!instance) instance = new bootstrap.Collapse(el, { toggle: false });
+                                instance.show();
+                            }
+                        } catch (e) {
+                            // ignore localStorage errors
+                        }
+
+                        el.addEventListener('shown.bs.collapse', function () {
+                            try { localStorage.setItem(key, 'open'); } catch (e) { }
+                        });
+                        el.addEventListener('hidden.bs.collapse', function () {
+                            try { localStorage.setItem(key, 'closed'); } catch (e) { }
+                        });
+                    });
+                } catch (ex) {
+                    // fail silently
+                }
+            });
+        })();
+    </script>
     @await Html.PartialAsync("_ValidationScriptsPartial")
 
     @RenderSection("Scripts", required: false)

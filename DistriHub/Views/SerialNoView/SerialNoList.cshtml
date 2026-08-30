@@ -1,0 +1,97 @@
+﻿@model IEnumerable<DistriHub.Models.ProductDetails>
+@{
+    ViewData["Title"] = "Product Details";
+    var serial = (string?)ViewData["Serial"] ?? string.Empty;
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/serial.css" />
+    <style>
+        /* Responsive table: stack cells on small screens using data-label */
+        @@media (max-width: 767.98px) {
+            .table-responsive table thead { display: none; }
+            .table-responsive table, .table-responsive tbody, .table-responsive tr, .table-responsive td {
+                display: block;
+                width: 100%;
+            }
+            .table-responsive tr { margin-bottom: 1rem; border: 1px solid #e9ecef; padding: .5rem; }
+            .table-responsive td {
+                text-align: left;
+                padding-left: 50%;
+                position: relative;
+                white-space: normal;
+            }
+            .table-responsive td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: .75rem;
+                top: .5rem;
+                font-weight: 600;
+                width: 45%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+    </style>
+}
+
+<section class="tab-components">
+    <div class="container-fluid">
+        <div class="title-wrapper pt-30">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="title">
+                        <h2>Product Details</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-elements-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card-style mb-30">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle table-striped">
+                                <thead class="table-light">
+                                    <tr class="text-center">
+                                        @* <th scope="col">ProductId</th> *@
+                                        <th scope="col">SerialNo</th>
+                                        <th scope="col">ModelId</th>
+                                        <th scope="col">UploadDate</th>
+                                        <th scope="col">IsUsed</th>
+                                        <th scope="col">Distributor</th>
+                                        <th scope="col">Dealer</th>
+                                        <th scope="col">Installation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null)
+                                    {
+                                        foreach (var p in Model)
+                                        {
+                                            <tr>
+                                                @* <td class="text-center" data-label="ProductId">@p.ProductId</td> *@
+                                                <td data-label="SerialNo">@p.SerialNo</td>
+                                                <td class="text-center" data-label="ModelId">@p.ModelId</td>
+                                                <td class="text-center" data-label="UploadDate">@p.UploadDate.ToString("yyyy-MM-dd")</td>
+                                                <td class="text-center" data-label="IsUsed">@(p.IsUsed ? "Yes" : "No")</td>
+                                                <td data-label="Distributor">@p.Distributor</td>
+                                                <td data-label="Dealer">@p.Dealer</td>
+                                                <td data-label="Installation">@p.Installation</td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr><td colspan="8" class="text-center">No records found.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -30,5 +30,6 @@ namespace DistriHub.Repository
         Task<string?> GetPasswordByUsernameAsync(string username);
         Task SetRefreshTokenAsync(string username, string refreshToken, DateTime expiry);
         Task<(string? RefreshToken, DateTime? Expiry)> GetRefreshTokenAsync(string username);
+        Task<IEnumerable<Models.ProductDetails>> GetProductDetailsAsync(string? serialFilter);
     }
 }
