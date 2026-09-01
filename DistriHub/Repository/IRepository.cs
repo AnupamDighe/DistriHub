@@ -34,5 +34,6 @@ namespace DistriHub.Repository
         Task<IEnumerable<Models.ProductDetails>> GetProductDetailsPagedAsync(string? serialFilter, int start, int length, string sortColumn, string sortDir);
         Task<int> GetProductDetailsCountAsync();
         Task<int> GetProductDetailsFilteredCountAsync(string? serialFilter);
+        Task<string?> GetPasswordByUsernameDetailsAsync(string username);
     }
 }

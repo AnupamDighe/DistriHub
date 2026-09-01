@@ -33,7 +33,7 @@ namespace DistriHub.Controllers
                 return BadRequest(new { error = "Invalid request" });
             }
 
-            var stored = await _repository.GetPasswordByUsernameAsync(request.Source.Trim());
+            var stored = await _repository.GetPasswordByUsernameDetailsAsync(request.Source.Trim());
             if (stored == null || !string.Equals(stored, request.AccessCode.Trim(), StringComparison.Ordinal))
             {
                 return Unauthorized(new { error = "Invalid credentials" });

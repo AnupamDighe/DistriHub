@@ -24,12 +24,24 @@ namespace DistriHub.Controllers
         }
 
         [HttpGet]
+        [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> ApiGetProductDetails()
         {
+            // Short helper to read from Form (POST) first, then Query (GET)
+            string GetValue(string key)
+            {
+                if (Request.HasFormContentType && Request.Form.ContainsKey(key))
+                    return Request.Form[key].FirstOrDefault();
+                if (Request.Query.ContainsKey(key))
+                    return Request.Query[key].FirstOrDefault();
+                return null;
+            }
+
             // DataTables server-side parameters
-            var drawStr = Request.Query["draw"].FirstOrDefault();
-            var startStr = Request.Query["start"].FirstOrDefault();
-            var lengthStr = Request.Query["length"].FirstOrDefault();
+            var drawStr = GetValue("draw");
+            var startStr = GetValue("start");
+            var lengthStr = GetValue("length");
 
             int draw = 0;
             int.TryParse(drawStr, out draw);
@@ -39,16 +51,16 @@ namespace DistriHub.Controllers
             int.TryParse(lengthStr, out length);
 
             // Custom serial filter or global search
-            var serial = Request.Query["serial"].FirstOrDefault();
+            var serial = GetValue("serial");
             if (string.IsNullOrWhiteSpace(serial))
-                serial = Request.Query["search[value]"].FirstOrDefault();
+                serial = GetValue("search[value]");
 
             // Ordering
-            var orderColStr = Request.Query["order[0][column]"].FirstOrDefault();
-            var orderDir = Request.Query["order[0][dir]"].FirstOrDefault() ?? "desc";
+            var orderColStr = GetValue("order[0][column]");
+            var orderDir = GetValue("order[0][dir]") ?? "desc";
             int orderCol = 0;
             int.TryParse(orderColStr, out orderCol);
-            var orderColName = Request.Query[$"columns[{orderCol}][data]"].FirstOrDefault() ?? "uploadDate";
+            var orderColName = GetValue($"columns[{orderCol}][data]") ?? "uploadDate";
 
             var recordsTotal = await _repo.GetProductDetailsCountAsync();
             var recordsFiltered = string.IsNullOrWhiteSpace(serial)

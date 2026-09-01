@@ -133,6 +133,7 @@
                 ordering: true,
                 ajax: {
                     url: '/SerialNoView/ApiGetProductDetails',
+                    type: 'POST', // use POST to avoid very long query strings from DataTables
                     dataSrc: 'data',
                     data: function (d) {
                         // send serial filter explicitly if present
@@ -141,15 +142,15 @@
                 },
                 columns: [
                     { data: 'serialNo' },
-                    { data: 'categoryName', className: 'text-center' },
-                    { data: 'subCategoryName', className: 'text-center' },
-                    { data: 'modelName', className: 'text-center' },
+                    { data: 'categoryName' },
+                    { data: 'subCategoryName' },
+                    { data: 'modelName' },
                     // { data: 'uploadDate', className: 'text-center', render: function (data) { return data ? data.substring(0, 10) : ''; } },
-                    { data: 'isUsedDisplay', className: 'text-center' },
+                    { data: 'isUsedDisplay' },
                     { data: 'distributor' },
                     { data: 'dealer' },
                     { data: 'finance' },
-                    { data: 'financeDate', className: 'text-center', render: function (data) { return data ? data.substring(0, 10) : ''; } },
+                    { data: 'financeDate', render: function (data) { return data ? data.substring(0, 10) : ''; } },
                     { data: 'installation' }
                 ],
                 columnDefs: [

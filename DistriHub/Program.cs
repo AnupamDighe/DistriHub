@@ -100,11 +100,15 @@ builder.Services.AddSession(options =>
 });
 
 // Add simple file-based logger (writes warnings and errors to Logs/*.txt)
-builder.Logging.AddFileLogger(options =>
+// Disabled in Production to reduce disk usage. Enable only for Development or Staging.
+if (!builder.Environment.IsProduction())
 {
-    options.LogDirectory = System.IO.Path.Combine(builder.Environment.ContentRootPath, "Logs");
-    options.FileNamePrefix = "distrihub";
-});
+    builder.Logging.AddFileLogger(options =>
+    {
+        options.LogDirectory = System.IO.Path.Combine(builder.Environment.ContentRootPath, "Logs");
+        options.FileNamePrefix = "distrihub";
+    });
+}
 
 var app = builder.Build();
 

@@ -278,6 +278,24 @@ namespace DistriHub.Repository
             return Convert.ToString(result);
         }
 
+        public async Task<string?> GetPasswordByUsernameDetailsAsync(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return null;
+
+            const string sql = "SELECT Password FROM dbo.UserDetails WHERE Username = @Username";
+
+            await using var conn = new SqlConnection(_connectionString);
+            await using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.Add("@Username", SqlDbType.NVarChar, 200).Value = username;
+            await conn.OpenAsync();
+            var result = await cmd.ExecuteScalarAsync();
+            if (result == null || result == DBNull.Value)
+                return null;
+
+            return Convert.ToString(result);
+        }
+
         public async Task SetRefreshTokenAsync(string username, string? refreshToken, DateTime expiry)
         {
             const string sql = "UPDATE dbo.UserDetails SET RefreshToken = @RefreshToken, RefreshTokenExpiry = @Expiry WHERE Username = @Username";
