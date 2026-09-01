@@ -1,4 +1,5 @@
 using System.Text;
+using System.IO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
@@ -107,79 +108,102 @@ builder.Logging.AddFileLogger(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+// Wrap startup and run in try/catch to capture and persist startup exceptions for diagnostics
+try
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-app.UseRouting();
-
-// Enable session middleware so HttpContext.Session is available in controllers and views
-app.UseSession();
-
-// Redirect unauthenticated users to the login page for non-exempt GET requests
-app.Use(async (context, next) =>
-{
-    var path = context.Request.Path;
-
-    // Exempt paths: login page, login POST, API, swagger, static assets, and favicon
-    if (path.StartsWithSegments("/Home/UserLogin", System.StringComparison.OrdinalIgnoreCase)
-        || path.StartsWithSegments("/api", System.StringComparison.OrdinalIgnoreCase)
-        || path.StartsWithSegments("/swagger", System.StringComparison.OrdinalIgnoreCase)
-        || path.StartsWithSegments("/assets", System.StringComparison.OrdinalIgnoreCase)
-        || path.StartsWithSegments("/favicon.ico", System.StringComparison.OrdinalIgnoreCase))
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
     {
-        await next();
-        return;
+        app.UseExceptionHandler("/Home/Error");
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
     }
 
-    // Allow login POST through
-    if (context.Request.Path.Equals("/Home/UserLogin", System.StringComparison.OrdinalIgnoreCase)
-        && context.Request.Method.Equals("POST", System.StringComparison.OrdinalIgnoreCase))
-    {
-        await next();
-        return;
-    }
+    app.UseHttpsRedirection();
+    app.UseRouting();
 
-    // Check session-based login (set in HomeController.UserLogin on successful auth)
-    var username = context.Session.GetString("Username");
-    if (string.IsNullOrWhiteSpace(username))
+    // Enable session middleware so HttpContext.Session is available in controllers and views
+    app.UseSession();
+
+    // Redirect unauthenticated users to the login page for non-exempt GET requests
+    app.Use(async (context, next) =>
     {
-        // Only redirect for browser GETs; let other requests pass through
-        if (context.Request.Method.Equals("GET", System.StringComparison.OrdinalIgnoreCase))
+        var path = context.Request.Path;
+
+        // Exempt paths: login page, login POST, API, swagger, static assets, and favicon
+        if (path.StartsWithSegments("/Home/UserLogin", System.StringComparison.OrdinalIgnoreCase)
+            || path.StartsWithSegments("/api", System.StringComparison.OrdinalIgnoreCase)
+            || path.StartsWithSegments("/swagger", System.StringComparison.OrdinalIgnoreCase)
+            || path.StartsWithSegments("/assets", System.StringComparison.OrdinalIgnoreCase)
+            || path.StartsWithSegments("/favicon.ico", System.StringComparison.OrdinalIgnoreCase))
         {
-            context.Response.Redirect("/Home/UserLogin");
+            await next();
             return;
         }
+
+        // Allow login POST through
+        if (context.Request.Path.Equals("/Home/UserLogin", System.StringComparison.OrdinalIgnoreCase)
+            && context.Request.Method.Equals("POST", System.StringComparison.OrdinalIgnoreCase))
+        {
+            await next();
+            return;
+        }
+
+        // Check session-based login (set in HomeController.UserLogin on successful auth)
+        var username = context.Session.GetString("Username");
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            // Only redirect for browser GETs; let other requests pass through
+            if (context.Request.Method.Equals("GET", System.StringComparison.OrdinalIgnoreCase))
+            {
+                context.Response.Redirect("/Home/UserLogin");
+                return;
+            }
+        }
+
+        await next();
+    });
+
+    app.UseAuthentication();
+    // Custom JWT middleware to allow token validation and attaching user to HttpContext
+    app.UseMiddleware<DistriHub.Middleware.JwtMiddleware>();
+    app.UseAuthorization();
+
+    // Enable Swagger
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DistriHub API V1"));
+
+    // Map attribute-routed controller actions (e.g. [HttpGet("Home/DownloadTemplate")])
+    app.MapControllers();
+
+    app.MapStaticAssets();
+
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}")
+        .WithStaticAssets();
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    try
+    {
+        // Ensure Logs directory exists and write exception details to startup-error.txt
+        var logsDir = Path.Combine(builder.Environment.ContentRootPath, "Logs");
+        Directory.CreateDirectory(logsDir);
+        var filePath = Path.Combine(logsDir, "startup-error.txt");
+        var msg = $"[{System.DateTime.UtcNow:O}] Startup exception:\n" + ex.ToString();
+        File.WriteAllText(filePath, msg);
+    }
+    catch
+    {
+        // Swallow to avoid secondary exceptions during logging
     }
 
-    await next();
-});
-
-app.UseAuthentication();
-// Custom JWT middleware to allow token validation and attaching user to HttpContext
-app.UseMiddleware<DistriHub.Middleware.JwtMiddleware>();
-app.UseAuthorization();
-
-// Enable Swagger
-app.UseSwagger();
-app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DistriHub API V1"));
-
-// Map attribute-routed controller actions (e.g. [HttpGet("Home/DownloadTemplate")])
-app.MapControllers();
-
-app.MapStaticAssets();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
-app.Run();
+    // Re-throw so the host can perform its normal shutdown logging/behavior
+    throw;
+}
 
 // Simple JwtMiddleware implementation in same file to avoid adding new files during quick iteration
 namespace DistriHub.Middleware

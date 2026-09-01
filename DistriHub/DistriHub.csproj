@@ -5,6 +5,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <!-- Ensure web.config is copied to publish output so IIS uses our stdoutLog settings for diagnostics -->
+  <ItemGroup>
+    <None Update="web.config">
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\alerts.html" Link="Views\alerts.html" />
