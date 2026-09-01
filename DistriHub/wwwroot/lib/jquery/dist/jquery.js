@@ -1145,7 +1145,18 @@ function setDocument( node ) {
 		( subWindow = document.defaultView ) && subWindow.top !== subWindow ) {
 
 		// Support: IE 9 - 11+, Edge 12 - 18+
-		subWindow.addEventListener( "unload", unloadHandler );
+		// Prefer pagehide where available (bfcache-friendly) to avoid Permissions-Policy unload violations
+		try {
+			var _unloadEvent = ( 'onpagehide' in ( subWindow || window ) ) ? 'pagehide' : 'unload';
+			subWindow.addEventListener( _unloadEvent, unloadHandler );
+		} catch (e) {
+			// Fallback to original unload if addEventListener or feature detection throws
+			try {
+				subWindow.addEventListener( "unload", unloadHandler );
+			} catch (__) {
+				// ignore
+			}
+		}
 	}
 
 	// Support: IE <10

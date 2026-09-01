@@ -13,28 +13,32 @@
     <link rel="stylesheet" href="@Url.Content("~/assets/css/materialdesignicons.min.css")" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="@Url.Content("~/assets/css/main.css")" />
     <style>
-        /* Brand name styling: bold, centered and responsive */
-        .brand-name {
-            display: block;
-            text-align: center;
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: #ffd000; /* match existing yellow look from template */
-            line-height: 1;
-        }
+            /* Brand name styling: bold, centered and responsive */
+            .brand-name {
+                display: block;
+                text-align: center;
+                font-weight: 700;
+                font-size: 1.25rem;
+                color: #ffd000; /* match existing yellow look from template */
+                line-height: 1;
+            }
 
-        @@media (min-width: 768px) {
-            .brand-name { font-size: 1.5rem; }
-        }
+            @@media (min-width: 768px) {
+                .brand-name {
+                    font-size: 1.5rem;
+                }
+            }
 
-        @@media (min-width: 1200px) {
-            .brand-name { font-size: 1.75rem; }
-        }
+            @@media (min-width: 1200px) {
+                .brand-name {
+                    font-size: 1.75rem;
+                }
+            }
     </style>
 </head>
 <body>
     @using Microsoft.AspNetCore.Http
-    @{ 
+@{
         // Safely read session: Session property throws if the session feature is not configured for the request.
         var currentUser = "Vikrant Bora";
         try
@@ -91,8 +95,11 @@
                         <li>
                             <a asp-controller="subcategory" asp-action="create" class="active"> SubCategory </a>
                         </li>
-                         <li>
+                        <li>
                             <a asp-controller="model" asp-action="create" class="active"> Model </a>
+                        </li>
+                        <li>
+                            <a asp-controller="SerialNoView" asp-action="SerialNoList" class="active"> Search by Serial No </a>
                         </li>
                     </ul>
                 </li>
@@ -117,10 +124,10 @@
                             </div>
                             <div class="header-search d-none d-md-flex">
                                 @* Search serial number - submits to SerialNoViewController.SerialNoList *@
-                                <form asp-controller="SerialNoView" asp-action="SerialNoList" method="get" class="d-flex">
+                                @* <form asp-controller="SerialNoView" asp-action="SerialNoList" method="get" class="d-flex">
                                     <input name="serial" type="text" class="form-control" placeholder="Search serial..." />
                                     <button type="submit" class="btn btn-outline-secondary ms-2" style="left: 0px !important"><i class="lni lni-search-alt"></i></button>
-                                </form>
+                                </form> *@
                             </div>
                         </div>
                     </div>
@@ -306,7 +313,7 @@
     </main>
     <!-- ======== main-wrapper end =========== -->
     <!-- ========= All Javascript files linkup ======== -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.slim.js"></script>
     <script src="@Url.Content("~/assets/js/bootstrap.bundle.min.js")"></script>
     <script src="@Url.Content("~/assets/js/moment.min.js")"></script>
     <script src="@Url.Content("~/assets/js/jvectormap.min.js")"></script>
@@ -314,38 +321,38 @@
     <script src="@Url.Content("~/assets/js/polyfill.js")"></script>
     <script src="@Url.Content("~/assets/js/main.js")"></script>
     <script>
-        // Persist sidebar collapse state across page loads so submenus stay open once expanded
-        (function () {
-            var keyPrefix = 'sidebar-collapse-';
-            document.addEventListener('DOMContentLoaded', function () {
-                try {
-                    var collapses = document.querySelectorAll('.sidebar-nav .collapse');
-                    collapses.forEach(function (el) {
-                        if (!el.id) return;
-                        var key = keyPrefix + el.id;
-                        try {
-                            var state = localStorage.getItem(key);
-                            if (state === 'open') {
-                                var instance = bootstrap.Collapse.getInstance(el);
-                                if (!instance) instance = new bootstrap.Collapse(el, { toggle: false });
-                                instance.show();
+            // Persist sidebar collapse state across page loads so submenus stay open once expanded
+            (function() {
+                var keyPrefix = 'sidebar-collapse-';
+                document.addEventListener('DOMContentLoaded', function() {
+                    try {
+                        var collapses = document.querySelectorAll('.sidebar-nav .collapse');
+                        collapses.forEach(function(el) {
+                            if (!el.id) return;
+                            var key = keyPrefix + el.id;
+                            try {
+                                var state = localStorage.getItem(key);
+                                if (state === 'open') {
+                                    var instance = bootstrap.Collapse.getInstance(el);
+                                    if (!instance) instance = new bootstrap.Collapse(el, { toggle: false });
+                                    instance.show();
+                                }
+                            } catch (e) {
+                                // ignore localStorage errors
                             }
-                        } catch (e) {
-                            // ignore localStorage errors
-                        }
 
-                        el.addEventListener('shown.bs.collapse', function () {
-                            try { localStorage.setItem(key, 'open'); } catch (e) { }
+                            el.addEventListener('shown.bs.collapse', function() {
+                                try { localStorage.setItem(key, 'open'); } catch (e) { }
+                            });
+                            el.addEventListener('hidden.bs.collapse', function() {
+                                try { localStorage.setItem(key, 'closed'); } catch (e) { }
+                            });
                         });
-                        el.addEventListener('hidden.bs.collapse', function () {
-                            try { localStorage.setItem(key, 'closed'); } catch (e) { }
-                        });
-                    });
-                } catch (ex) {
-                    // fail silently
-                }
-            });
-        })();
+                    } catch (ex) {
+                        // fail silently
+                    }
+                });
+            })();
     </script>
     @await Html.PartialAsync("_ValidationScriptsPartial")
 

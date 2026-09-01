@@ -29,15 +29,110 @@ namespace DistriHub.Repository
             cmd.Parameters.Add("@CategoryId", SqlDbType.Int).Value = categoryId;
             await conn.OpenAsync();
             await using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            var dt = new DataTable();
+            dt.Load(reader);
+            foreach (DataRow row in dt.Rows)
             {
                 list.Add(new SubCategory
                 {
-                    SubCategoryId = reader.GetInt32(0),
-                    CategoryId = reader.GetInt32(1),
-                    SubCategoryName = reader.GetString(2),
-                    CreatedAt = reader.GetDateTime(3),
-                    UpdatedAt = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4)
+                    SubCategoryId = row.IsNull(0) ? 0 : row.Field<int>(0),
+                    CategoryId = row.IsNull(1) ? 0 : row.Field<int>(1),
+                    SubCategoryName = row.IsNull(2) ? null : row.Field<string>(2),
+                    CreatedAt = row.IsNull(3) ? default : row.Field<DateTime>(3),
+                    UpdatedAt = row.IsNull(4) ? (DateTime?)null : row.Field<DateTime>(4)
+                });
+            }
+
+            return list;
+        }
+
+        public async Task<int> GetProductDetailsCountAsync()
+        {
+            const string sql = "SELECT COUNT(1) FROM [dbo].[ProductDetails];";
+            await using var conn = new SqlConnection(_connectionString);
+            await using var cmd = new SqlCommand(sql, conn);
+            await conn.OpenAsync();
+            var result = await cmd.ExecuteScalarAsync();
+            return Convert.ToInt32(result);
+        }
+
+        public async Task<int> GetProductDetailsFilteredCountAsync(string? serialFilter)
+        {
+            string sql;
+            if (string.IsNullOrWhiteSpace(serialFilter))
+            {
+                sql = "SELECT COUNT(1) FROM [dbo].[ProductDetails];";
+                await using var conn0 = new SqlConnection(_connectionString);
+                await using var cmd0 = new SqlCommand(sql, conn0);
+                await conn0.OpenAsync();
+                var res0 = await cmd0.ExecuteScalarAsync();
+                return Convert.ToInt32(res0);
+            }
+
+            sql = "SELECT COUNT(1) FROM [dbo].[ProductDetails] WHERE LOWER(SerialNo) LIKE '%' + LOWER(@Serial) + '%';";
+            await using var conn = new SqlConnection(_connectionString);
+            await using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.Add("@Serial", SqlDbType.NVarChar, 100).Value = serialFilter.Trim();
+            await conn.OpenAsync();
+            var result = await cmd.ExecuteScalarAsync();
+            return Convert.ToInt32(result);
+        }
+
+        public async Task<IEnumerable<Models.ProductDetails>> GetProductDetailsPagedAsync(string? serialFilter, int start, int length, string sortColumn, string sortDir)
+        {
+            var list = new List<Models.ProductDetails>();
+
+            // Validate sort column and direction to prevent SQL injection
+            var allowedColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "SerialNo", "CategoryName", "SubCategoryName", "ModelName", "UploadDate", "IsUsed", "Finance", "Distributor", "FinanceDate", "Dealer", "Installation"
+            };
+            if (!allowedColumns.Contains(sortColumn))
+                sortColumn = "UploadDate";
+            sortDir = string.Equals(sortDir, "asc", StringComparison.OrdinalIgnoreCase) ? "ASC" : "DESC";
+
+            // Handle length -1 (DataTables uses -1 to indicate all records)
+            if (length <= 0) length = int.MaxValue;
+
+            string where = string.IsNullOrWhiteSpace(serialFilter)
+                ? string.Empty
+                : "WHERE LOWER(SerialNo) LIKE '%' + LOWER(@Serial) + '%'";
+
+            string sql = $"SELECT a.ProductId, c.CategoryName, e.SubCategoryName, b.ModelName, a.SerialNo, a.UploadDate, CASE WHEN a.IsUsed=1 THEN 'Yes' ELSE 'No' END AS IsUsed, a.Finance, a.Distributor, a.FinanceDate, a.Dealer, a.Installation, a.InstallationDate, a.CreatedAt, a.UpdatedAt FROM [dbo].[ProductDetails] a LEFT JOIN [Model] b ON a.ModelId=b.ModelId LEFT JOIN Category c ON a.CategoryId=c.CategoryId LEFT JOIN SubCategory e ON a.SubCategoryId=e.SubCategoryId {where} ORDER BY {sortColumn} {sortDir} OFFSET @Start ROWS FETCH NEXT @Length ROWS ONLY;";
+
+            await using var conn = new SqlConnection(_connectionString);
+            await using var cmd = new SqlCommand(sql, conn);
+            if (!string.IsNullOrWhiteSpace(serialFilter))
+                cmd.Parameters.Add("@Serial", SqlDbType.NVarChar, 100).Value = serialFilter.Trim();
+            cmd.Parameters.Add("@Start", SqlDbType.Int).Value = start;
+            cmd.Parameters.Add("@Length", SqlDbType.Int).Value = length;
+
+            await conn.OpenAsync();
+            // Use DataTable to load results instead of a DataReader
+            await using var reader = await cmd.ExecuteReaderAsync();
+            var dt = new DataTable();
+            dt.Load(reader);
+
+            foreach (DataRow row in dt.Rows)
+            {
+                list.Add(new Models.ProductDetails
+                {
+                    ProductId = row.IsNull(0) ? 0 : row.Field<int>(0),
+                    CategoryName = row.IsNull(1) ? null : row.Field<string>(1),
+                    SubCategoryName = row.IsNull(2) ? null : row.Field<string>(2),
+                    ModelName = row.IsNull(3) ? null : row.Field<string>(3),
+                    SerialNo = row.IsNull(4) ? null : row.Field<string>(4),
+                    UploadDate = row.IsNull(5) ? default : row.Field<DateTime>(5),
+                    IsUsedDisplay = row.IsNull(6) ? null : row.Field<string>(6),
+                    IsUsed = row.IsNull(6) ? false : string.Equals(row.Field<string>(6), "Yes", StringComparison.OrdinalIgnoreCase),
+                    Finance = row.IsNull(7) ? null : row.Field<string>(7),
+                    Distributor = row.IsNull(8) ? null : row.Field<string>(8),
+                    FinanceDate = row.IsNull(9) ? (DateTime?)null : row.Field<DateTime>(9),
+                    Dealer = row.IsNull(10) ? null : row.Field<string>(10),
+                    Installation = row.IsNull(11) ? null : row.Field<string>(11),
+                    InstallationDate = row.IsNull(12) ? (DateTime?)null : row.Field<DateTime>(12),
+                    CreatedAt = row.IsNull(13) ? default : row.Field<DateTime>(13),
+                    UpdatedAt = row.IsNull(14) ? (DateTime?)null : row.Field<DateTime>(14)
                 });
             }
 
@@ -74,16 +169,19 @@ namespace DistriHub.Repository
             cmd.Parameters.Add("@Name", SqlDbType.NVarChar, 100).Value = name;
             await conn.OpenAsync();
             await using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            var dt = new DataTable();
+            dt.Load(reader);
+            if (dt.Rows.Count > 0)
             {
+                var row = dt.Rows[0];
                 return new Models.Model
                 {
-                    ModelId = reader.GetInt32(0),
-                    CategoryId = reader.GetInt32(1),
-                    SubCategoryId = reader.GetInt32(2),
-                    ModelName = reader.GetString(3),
-                    CreatedAt = reader.GetDateTime(4),
-                    UpdatedAt = reader.IsDBNull(5) ? (DateTime?)null : reader.GetDateTime(5)
+                    ModelId = row.IsNull(0) ? 0 : row.Field<int>(0),
+                    CategoryId = row.IsNull(1) ? 0 : row.Field<int>(1),
+                    SubCategoryId = row.IsNull(2) ? 0 : row.Field<int>(2),
+                    ModelName = row.IsNull(3) ? null : row.Field<string>(3),
+                    CreatedAt = row.IsNull(4) ? default : row.Field<DateTime>(4),
+                    UpdatedAt = row.IsNull(5) ? (DateTime?)null : row.Field<DateTime>(5)
                 };
             }
 
@@ -202,10 +300,13 @@ namespace DistriHub.Repository
             cmd.Parameters.Add("@Username", SqlDbType.NVarChar, 200).Value = username;
             await conn.OpenAsync();
             await using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            var dt = new DataTable();
+            dt.Load(reader);
+            if (dt.Rows.Count > 0)
             {
-                var token = reader.IsDBNull(0) ? null : reader.GetString(0);
-                var expiry = reader.IsDBNull(1) ? (DateTime?)null : reader.GetDateTime(1);
+                var row = dt.Rows[0];
+                var token = row.IsNull(0) ? null : row.Field<string>(0);
+                var expiry = row.IsNull(1) ? (DateTime?)null : row.Field<DateTime>(1);
                 return (token, expiry);
             }
 
@@ -263,16 +364,19 @@ namespace DistriHub.Repository
             cmd.Parameters.Add("@Id", SqlDbType.Int).Value = id;
             await conn.OpenAsync();
             await using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            var dt = new DataTable();
+            dt.Load(reader);
+            if (dt.Rows.Count > 0)
             {
+                var row = dt.Rows[0];
                 return new Models.Model
                 {
-                    ModelId = reader.GetInt32(0),
-                    CategoryId = reader.GetInt32(1),
-                    SubCategoryId = reader.GetInt32(2),
-                    ModelName = reader.GetString(3),
-                    CreatedAt = reader.GetDateTime(4),
-                    UpdatedAt = reader.IsDBNull(5) ? (DateTime?)null : reader.GetDateTime(5)
+                    ModelId = row.IsNull(0) ? 0 : row.Field<int>(0),
+                    CategoryId = row.IsNull(1) ? 0 : row.Field<int>(1),
+                    SubCategoryId = row.IsNull(2) ? 0 : row.Field<int>(2),
+                    ModelName = row.IsNull(3) ? null : row.Field<string>(3),
+                    CreatedAt = row.IsNull(4) ? default : row.Field<DateTime>(4),
+                    UpdatedAt = row.IsNull(5) ? (DateTime?)null : row.Field<DateTime>(5)
                 };
             }
 
@@ -313,25 +417,28 @@ namespace DistriHub.Repository
             cmd.Parameters.Add("@SerialNo", SqlDbType.NVarChar, 100).Value = serialNo;
             await conn.OpenAsync();
             await using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            var dt = new DataTable();
+            dt.Load(reader);
+            if (dt.Rows.Count > 0)
             {
+                var row = dt.Rows[0];
                 return new Models.ProductDetails
                 {
-                    ProductId = reader.GetInt32(0),
-                    CategoryId = reader.GetInt32(1),
-                    SubCategoryId = reader.GetInt32(2),
-                    ModelId = reader.GetInt32(3),
-                    SerialNo = reader.IsDBNull(4) ? null : reader.GetString(4),
-                    UploadDate = reader.GetDateTime(5),
-                    IsUsed = reader.GetBoolean(6),
-                    Finance = reader.IsDBNull(7) ? null : reader.GetString(7),
-                    Distributor = reader.IsDBNull(8) ? null : reader.GetString(8),
-                    FinanceDate = reader.IsDBNull(9) ? (DateTime?)null : reader.GetDateTime(9),
-                    Dealer = reader.IsDBNull(10) ? null : reader.GetString(10),
-                    Installation = reader.IsDBNull(11) ? null : reader.GetString(11),
-                    InstallationDate = reader.IsDBNull(12) ? (DateTime?)null : reader.GetDateTime(12),
-                    CreatedAt = reader.GetDateTime(13),
-                    UpdatedAt = reader.IsDBNull(14) ? (DateTime?)null : reader.GetDateTime(14)
+                    ProductId = row.IsNull(0) ? 0 : row.Field<int>(0),
+                    CategoryId = row.IsNull(1) ? 0 : row.Field<int>(1),
+                    SubCategoryId = row.IsNull(2) ? 0 : row.Field<int>(2),
+                    ModelId = row.IsNull(3) ? 0 : row.Field<int>(3),
+                    SerialNo = row.IsNull(4) ? null : row.Field<string>(4),
+                    UploadDate = row.IsNull(5) ? default : row.Field<DateTime>(5),
+                    IsUsed = row.IsNull(6) ? false : row.Field<bool>(6),
+                    Finance = row.IsNull(7) ? null : row.Field<string>(7),
+                    Distributor = row.IsNull(8) ? null : row.Field<string>(8),
+                    FinanceDate = row.IsNull(9) ? (DateTime?)null : row.Field<DateTime>(9),
+                    Dealer = row.IsNull(10) ? null : row.Field<string>(10),
+                    Installation = row.IsNull(11) ? null : row.Field<string>(11),
+                    InstallationDate = row.IsNull(12) ? (DateTime?)null : row.Field<DateTime>(12),
+                    CreatedAt = row.IsNull(13) ? default : row.Field<DateTime>(13),
+                    UpdatedAt = row.IsNull(14) ? (DateTime?)null : row.Field<DateTime>(14)
                 };
             }
 
@@ -452,15 +559,18 @@ namespace DistriHub.Repository
             cmd.Parameters.Add("@Name", SqlDbType.NVarChar, 100).Value = name;
             await conn.OpenAsync();
             await using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            var dt = new DataTable();
+            dt.Load(reader);
+            if (dt.Rows.Count > 0)
             {
+                var row = dt.Rows[0];
                 return new SubCategory
                 {
-                    SubCategoryId = reader.GetInt32(0),
-                    CategoryId = reader.GetInt32(1),
-                    SubCategoryName = reader.GetString(2),
-                    CreatedAt = reader.GetDateTime(3),
-                    UpdatedAt = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4)
+                    SubCategoryId = row.IsNull(0) ? 0 : row.Field<int>(0),
+                    CategoryId = row.IsNull(1) ? 0 : row.Field<int>(1),
+                    SubCategoryName = row.IsNull(2) ? null : row.Field<string>(2),
+                    CreatedAt = row.IsNull(3) ? default : row.Field<DateTime>(3),
+                    UpdatedAt = row.IsNull(4) ? (DateTime?)null : row.Field<DateTime>(4)
                 };
             }
 
@@ -492,14 +602,16 @@ namespace DistriHub.Repository
             await using var cmd = new SqlCommand(sql, conn);
             await conn.OpenAsync();
             await using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            var dt = new DataTable();
+            dt.Load(reader);
+            foreach (DataRow row in dt.Rows)
             {
                 list.Add(new Category
                 {
-                    CategoryId = reader.GetInt32(0),
-                    CategoryName = reader.GetString(1),
-                    CreatedAt = reader.GetDateTime(2),
-                    UpdatedAt = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3)
+                    CategoryId = row.IsNull(0) ? 0 : row.Field<int>(0),
+                    CategoryName = row.IsNull(1) ? null : row.Field<string>(1),
+                    CreatedAt = row.IsNull(2) ? default : row.Field<DateTime>(2),
+                    UpdatedAt = row.IsNull(3) ? (DateTime?)null : row.Field<DateTime>(3)
                 });
             }
 
@@ -515,14 +627,17 @@ namespace DistriHub.Repository
             cmd.Parameters.Add("@Id", SqlDbType.Int).Value = id;
             await conn.OpenAsync();
             await using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            var dt2 = new DataTable();
+            dt2.Load(reader);
+            if (dt2.Rows.Count > 0)
             {
+                var row = dt2.Rows[0];
                 return new Category
                 {
-                    CategoryId = reader.GetInt32(0),
-                    CategoryName = reader.GetString(1),
-                    CreatedAt = reader.GetDateTime(2),
-                    UpdatedAt = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3)
+                    CategoryId = row.IsNull(0) ? 0 : row.Field<int>(0),
+                    CategoryName = row.IsNull(1) ? null : row.Field<string>(1),
+                    CreatedAt = row.IsNull(2) ? default : row.Field<DateTime>(2),
+                    UpdatedAt = row.IsNull(3) ? (DateTime?)null : row.Field<DateTime>(3)
                 };
             }
 
@@ -539,59 +654,62 @@ namespace DistriHub.Repository
             cmd.Parameters.Add("@Name", SqlDbType.NVarChar, 100).Value = name;
             await conn.OpenAsync();
             await using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            var dt3 = new DataTable();
+            dt3.Load(reader);
+            if (dt3.Rows.Count > 0)
             {
+                var row = dt3.Rows[0];
                 return new Category
                 {
-                    CategoryId = reader.GetInt32(0),
-                    CategoryName = reader.GetString(1),
-                    CreatedAt = reader.GetDateTime(2),
-                    UpdatedAt = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3)
+                    CategoryId = row.IsNull(0) ? 0 : row.Field<int>(0),
+                    CategoryName = row.IsNull(1) ? null : row.Field<string>(1),
+                    CreatedAt = row.IsNull(2) ? default : row.Field<DateTime>(2),
+                    UpdatedAt = row.IsNull(3) ? (DateTime?)null : row.Field<DateTime>(3)
                 };
             }
 
             return null;
         }
 
-        public async Task<IEnumerable<Models.ProductDetails>> GetProductDetailsAsync(string? serialFilter)
+        public async Task<IEnumerable<Models.ProductDetails>> GetProductDetailsAsync()
         {
             var list = new List<Models.ProductDetails>();
-            string sql;
-            if (string.IsNullOrWhiteSpace(serialFilter))
-            {
-                sql = "SELECT ProductId, CategoryId, SubCategoryId, ModelId, SerialNo, UploadDate, IsUsed, Finance, Distributor, FinanceDate, Dealer, Installation, InstallationDate, CreatedAt, UpdatedAt FROM [dbo].[ProductDetails] ORDER BY UploadDate DESC;";
-            }
-            else
-            {
-                sql = "SELECT ProductId, CategoryId, SubCategoryId, ModelId, SerialNo, UploadDate, IsUsed, Finance, Distributor, FinanceDate, Dealer, Installation, InstallationDate, CreatedAt, UpdatedAt FROM [dbo].[ProductDetails] WHERE LOWER(SerialNo) LIKE '%' + LOWER(@Serial) + '%' ORDER BY UploadDate DESC;";
-            }
+            string sql = "SELECT a.ProductId, c.CategoryName, e.SubCategoryName, b.ModelName, a.SerialNo, a.UploadDate, CASE WHEN a.IsUsed=1 THEN 'Yes' ELSE 'No' END AS IsUsed, a.Finance, a.Distributor, a.FinanceDate, a.Dealer, a.Installation, a.InstallationDate, a.CreatedAt, a.UpdatedAt FROM [dbo].[ProductDetails] a LEFT JOIN [Model] b ON a.ModelId=b.ModelId LEFT JOIN Category c ON a.CategoryId=c.CategoryId LEFT JOIN SubCategory e ON a.SubCategoryId=e.SubCategoryId;";
 
             await using var conn = new SqlConnection(_connectionString);
             await using var cmd = new SqlCommand(sql, conn);
-            if (!string.IsNullOrWhiteSpace(serialFilter))
-                cmd.Parameters.Add("@Serial", SqlDbType.NVarChar, 100).Value = serialFilter.Trim();
-
             await conn.OpenAsync();
-            await using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+
+            // Load results into a DataTable for simpler column-based access
+            var table = new DataTable();
+            await using (var reader = await cmd.ExecuteReaderAsync())
             {
+                table.Load(reader);
+            }
+
+            foreach (DataRow row in table.Rows)
+            {
+                // Use column names to map correctly to the model's display properties
+                var isUsedDisplay = row.IsNull("IsUsed") ? null : row.Field<string>("IsUsed");
+
                 list.Add(new Models.ProductDetails
                 {
-                    ProductId = reader.GetInt32(0),
-                    CategoryId = reader.GetInt32(1),
-                    SubCategoryId = reader.GetInt32(2),
-                    ModelId = reader.GetInt32(3),
-                    SerialNo = reader.IsDBNull(4) ? null : reader.GetString(4),
-                    UploadDate = reader.GetDateTime(5),
-                    IsUsed = reader.GetBoolean(6),
-                    Finance = reader.IsDBNull(7) ? null : reader.GetString(7),
-                    Distributor = reader.IsDBNull(8) ? null : reader.GetString(8),
-                    FinanceDate = reader.IsDBNull(9) ? (DateTime?)null : reader.GetDateTime(9),
-                    Dealer = reader.IsDBNull(10) ? null : reader.GetString(10),
-                    Installation = reader.IsDBNull(11) ? null : reader.GetString(11),
-                    InstallationDate = reader.IsDBNull(12) ? (DateTime?)null : reader.GetDateTime(12),
-                    CreatedAt = reader.GetDateTime(13),
-                    UpdatedAt = reader.IsDBNull(14) ? (DateTime?)null : reader.GetDateTime(14)
+                    ProductId = row.Field<int>("ProductId"),
+                    CategoryName = row.IsNull("CategoryName") ? null : row.Field<string>("CategoryName"),
+                    SubCategoryName = row.IsNull("SubCategoryName") ? null : row.Field<string>("SubCategoryName"),
+                    ModelName = row.IsNull("ModelName") ? null : row.Field<string>("ModelName"),
+                    SerialNo = row.IsNull("SerialNo") ? null : row.Field<string>("SerialNo"),
+                    UploadDate = row.Field<DateTime>("UploadDate"),
+                    IsUsedDisplay = isUsedDisplay,
+                    IsUsed = !string.IsNullOrEmpty(isUsedDisplay) && string.Equals(isUsedDisplay, "Yes", StringComparison.OrdinalIgnoreCase),
+                    Finance = row.IsNull("Finance") ? null : row.Field<string>("Finance"),
+                    Distributor = row.IsNull("Distributor") ? null : row.Field<string>("Distributor"),
+                    FinanceDate = row.IsNull("FinanceDate") ? (DateTime?)null : row.Field<DateTime>("FinanceDate"),
+                    Dealer = row.IsNull("Dealer") ? null : row.Field<string>("Dealer"),
+                    Installation = row.IsNull("Installation") ? null : row.Field<string>("Installation"),
+                    InstallationDate = row.IsNull("InstallationDate") ? (DateTime?)null : row.Field<DateTime>("InstallationDate"),
+                    CreatedAt = row.Field<DateTime>("CreatedAt"),
+                    UpdatedAt = row.IsNull("UpdatedAt") ? (DateTime?)null : row.Field<DateTime>("UpdatedAt")
                 });
             }
 

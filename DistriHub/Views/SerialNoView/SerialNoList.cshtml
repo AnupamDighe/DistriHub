@@ -5,6 +5,8 @@
 }
 @section Styles {
     <link rel="stylesheet" href="~/css/serial.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
     <style>
         /* Responsive table: stack cells on small screens using data-label */
         @@media (max-width: 767.98px) {
@@ -52,40 +54,31 @@
                 <div class="col-lg-12">
                     <div class="card-style mb-30">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle table-striped">
+                            <div class="mb-3 d-flex align-items-center">
+                                @* <label for="serialFilter" class="me-2 mb-0">Serial:</label>
+                                <input id="serialFilter" class="form-control form-control-sm me-2" style="max-width:300px;" value="@ViewData["Serial"]" />
+                                <button id="btnFilter" class="btn btn-sm btn-primary">Filter</button>
+                                <button id="btnClear" class="btn btn-sm btn-secondary ms-2">Clear</button> *@
+                            </div>
+                            <table id="productTable" class="table table-hover align-middle table-striped" style="width:100%">
                                 <thead class="table-light">
                                     <tr class="text-center">
                                         @* <th scope="col">ProductId</th> *@
-                                        <th scope="col">SerialNo</th>
-                                        <th scope="col">ModelId</th>
-                                        <th scope="col">UploadDate</th>
-                                        <th scope="col">IsUsed</th>
+                                        <th scope="col">Serial No</th>
+                                        <th scope="col">Category Name</th>
+                                        <th scope="col">Sub Category Name</th>
+                                        <th scope="col">Model Name</th>
+                                        @* <th scope="col">Upload Date</th> *@
+                                        <th scope="col">Is Used Display</th>
                                         <th scope="col">Distributor</th>
                                         <th scope="col">Dealer</th>
+                                        <th scope="col">Finance</th>
+                                        <th scope="col">FinanceDate</th>
                                         <th scope="col">Installation</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if (Model != null)
-                                    {
-                                        foreach (var p in Model)
-                                        {
-                                            <tr>
-                                                @* <td class="text-center" data-label="ProductId">@p.ProductId</td> *@
-                                                <td data-label="SerialNo">@p.SerialNo</td>
-                                                <td class="text-center" data-label="ModelId">@p.ModelId</td>
-                                                <td class="text-center" data-label="UploadDate">@p.UploadDate.ToString("yyyy-MM-dd")</td>
-                                                <td class="text-center" data-label="IsUsed">@(p.IsUsed ? "Yes" : "No")</td>
-                                                <td data-label="Distributor">@p.Distributor</td>
-                                                <td data-label="Dealer">@p.Dealer</td>
-                                                <td data-label="Installation">@p.Installation</td>
-                                            </tr>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <tr><td colspan="8" class="text-center">No records found.</td></tr>
-                                    }
+                                    @* DataTable will populate rows via AJAX *@
                                 </tbody>
                             </table>
                         </div>
@@ -95,3 +88,74 @@
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <!-- JSZip for excelHtml5 export. Use a reliable CDN without integrity to avoid mismatched hash errors in some environments -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var table = $('#productTable').DataTable({
+                // show length menu, buttons, filter, table
+                dom: 'lBfrtip',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Export to Excel',
+                        titleAttr: 'Export to Excel',
+                        filename: 'ProductDetails',
+                        exportOptions: {
+                            columns: ':visible',
+                            modifier: {
+                                // When serverSide is true, export will only include rows currently loaded on client.
+                                // Set to 'all' if you want to export unfiltered server data (requires server support).
+                                search: 'applied',
+                                order: 'applied'
+                            }
+                        }
+                    }
+                ],
+                responsive: true,
+                processing: true,
+                serverSide: true, // server-side processing for large datasets
+                deferRender: true,
+                paging: true,
+                // default to showing All entries (DataTables uses -1 for 'All')
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
+                language: {
+                    lengthMenu: 'Show _MENU_ entries'
+                },
+                searching: true,
+                ordering: true,
+                ajax: {
+                    url: '/SerialNoView/ApiGetProductDetails',
+                    dataSrc: 'data',
+                    data: function (d) {
+                        // send serial filter explicitly if present
+                        d.serial = $('#serialFilter').val();
+                    }
+                },
+                columns: [
+                    { data: 'serialNo' },
+                    { data: 'categoryName', className: 'text-center' },
+                    { data: 'subCategoryName', className: 'text-center' },
+                    { data: 'modelName', className: 'text-center' },
+                    // { data: 'uploadDate', className: 'text-center', render: function (data) { return data ? data.substring(0, 10) : ''; } },
+                    { data: 'isUsedDisplay', className: 'text-center' },
+                    { data: 'distributor' },
+                    { data: 'dealer' },
+                    { data: 'finance' },
+                    { data: 'financeDate', className: 'text-center', render: function (data) { return data ? data.substring(0, 10) : ''; } },
+                    { data: 'installation' }
+                ],
+                columnDefs: [
+                    { targets: [1,2,3], className: 'text-center' }
+                ]
+            });
+        });
+    </script>
+}

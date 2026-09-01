@@ -8,7 +8,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,123 +21,205 @@
     <link rel="stylesheet" href="~/assets/css/fullcalendar.css" />
     <link rel="stylesheet" href="~/assets/css/main.css" />
     <style>
-      /* Reset and prevent page-level scrollbars */
-      html, body { height: 100%; margin: 0; padding: 0; box-sizing: border-box; }
-      body { overflow-x: hidden; overflow-y: hidden; }
+            /* Reset and prevent page-level scrollbars */
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-      /* Overall signin section compact sizing */
-      .signin-section { min-height: 50vh; max-height: 75vh; display: flex; align-items: center; padding: 0; }
+            body {
+                overflow-x: hidden;
+                overflow-y: hidden;
+            }
 
-      .signin-section > .container-fluid { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+            /* Overall signin section compact sizing */
+            .signin-section {
+                min-height: 50vh;
+                max-height: 75vh;
+                display: flex;
+                align-items: center;
+                padding: 0;
+            }
 
-      .title-wrapper { padding: 0.75rem 0; }
+                .signin-section > .container-fluid {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 0 1rem;
+                }
 
-      .auth-row { display: flex; width: 100%; align-items: stretch; }
+            .title-wrapper {
+                padding: 0.75rem 0;
+            }
 
-      /* Left illustration column */
-      .auth-row > .col-lg-6 { padding: 0; }
-      .auth-cover-wrapper { flex: 1 1 50%; background: #f6f8ff; display: flex; align-items: center; justify-content: center; }
-      .auth-cover { width: 100%; max-width: 520px; padding: 1rem; box-sizing: border-box; }
-      .cover-image img { display: block; margin: 0 auto; max-width: 100%; height: auto; max-height: calc(75vh - 140px); }
+            .auth-row {
+                display: flex;
+                width: 100%;
+                align-items: stretch;
+            }
 
-      /* Right form column - make it compact and centered, limit width to avoid horizontal overflow */
-      .signin-wrapper { flex: 1 1 50%; display: flex; align-items: center; background: #fff; padding: 1rem; }
-      .form-wrapper { width: 100%; max-width: 480px; margin: 0 auto; padding: 0.5rem; overflow: auto; max-height: calc(75vh - 100px); }
+                /* Left illustration column */
+                .auth-row > .col-lg-6 {
+                    padding: 0;
+                }
 
-      /* Make inputs and button full width but fit inside the max-width */
-      .input-style-1 input.form-control { background: #f3f7ff; border: 1px solid #e6eefc; }
-      .button-group .main-btn { width: 100%; }
+            .auth-cover-wrapper {
+                flex: 1 1 50%;
+                background: #f6f8ff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
 
-      /* Small screens: hide illustration and allow page scrolling if needed */
-      @@media (max-width: 767.98px) {
-        body { overflow-y: auto; }
-        .auth-cover-wrapper { display: none; }
-        .signin-section { min-height: auto; max-height: none; }
-        .form-wrapper { max-width: 100%; max-height: none; padding: 0.5rem; }
-      }
+            .auth-cover {
+                width: 100%;
+                max-width: 520px;
+                padding: 1rem;
+                box-sizing: border-box;
+            }
+
+            .cover-image img {
+                display: block;
+                margin: 0 auto;
+                max-width: 100%;
+                height: auto;
+                max-height: calc(75vh - 140px);
+            }
+
+            /* Right form column - make it compact and centered, limit width to avoid horizontal overflow */
+            .signin-wrapper {
+                flex: 1 1 50%;
+                display: flex;
+                align-items: center;
+                background: #fff;
+                padding: 1rem;
+            }
+
+            .form-wrapper {
+                width: 100%;
+                max-width: 480px;
+                margin: 0 auto;
+                padding: 0.5rem;
+                overflow: auto;
+                max-height: calc(75vh - 100px);
+            }
+
+            /* Make inputs and button full width but fit inside the max-width */
+            .input-style-1 input.form-control {
+                background: #f3f7ff;
+                border: 1px solid #e6eefc;
+            }
+
+            .button-group .main-btn {
+                width: 100%;
+            }
+
+            /* Small screens: hide illustration and allow page scrolling if needed */
+            @@media (max-width: 767.98px) {
+                body {
+                    overflow-y: auto;
+                }
+
+                .auth-cover-wrapper {
+                    display: none;
+                }
+
+                .signin-section {
+                    min-height: auto;
+                    max-height: none;
+                }
+
+                .form-wrapper {
+                    max-width: 100%;
+                    max-height: none;
+                    padding: 0.5rem;
+                }
+            }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <section class="signin-section">
-      <div class="container-fluid">
-        <div class="title-wrapper pt-30">
-          <div class="row align-items-center">
-            <div class="col-md-6">
-              <div class="title">
-                <h2>Sign in</h2>
-              </div>
+        <div class="container-fluid">
+            <div class="title-wrapper pt-30">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="title">
+                            <h2>Sign in</h2>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+
+            <div class="row g-0 auth-row">
+                <div class="col-lg-6">
+                    <div class="auth-cover-wrapper bg-primary-100">
+                        <div class="auth-cover">
+                            <div class="title text-center">
+                                <h1 class="text-primary mb-10">Welcome Back</h1>
+                                <p class="text-medium">Sign in to your Existing account to continue</p>
+                            </div>
+                            <div class="cover-image">
+                                <img src="~/assets/images/auth/signin-image.svg" alt="" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="signin-wrapper">
+                        <div class="" style="padding-top:1rem">
+                            @* form-wrapper *@
+                            <h6 class="mb-15">Sign In Form</h6>
+                            <p class="text-sm mb-25">Start creating the best possible user experience for your customers.</p>
+
+                            <form asp-action="UserLogin" method="post" novalidate>
+                                @Html.AntiForgeryToken()
+                                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="input-style-1">
+                                            <label asp-for="Username"></label>
+                                            <input asp-for="Username" class="form-control" placeholder="Username" />
+                                            <span asp-validation-for="Username" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="input-style-1">
+                                            <label asp-for="Password"></label>
+                                            <input asp-for="Password" class="form-control" placeholder="Password" autocomplete="current-password" />
+                                            <span asp-validation-for="Password" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-xxl-6 col-lg-12 col-md-6">
+                                        <div class="form-check checkbox-style mb-30">
+                                            <input class="form-check-input" type="checkbox" value="true" id="checkbox-remember" name="RememberMe" />
+                                            <label class="form-check-label" for="checkbox-remember">Remember me next time</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-xxl-6 col-lg-12 col-md-6">
+                                        <div class="text-start text-md-end text-lg-start text-xxl-end mb-30">
+                                            @* <a asp-controller="Home" asp-action="ResetPassword" class="hover-underline">Forgot Password?</a> *@
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="button-group d-flex justify-content-center flex-wrap">
+                                            <button type="submit" class="main-btn primary-btn btn-hover w-100 text-center">Sign In</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div class="singin-option pt-40">
+                                @* <p class="text-sm text-medium text-center text-gray">Easy Sign In With</p> *@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="row g-0 auth-row">
-          <div class="col-lg-6">
-            <div class="auth-cover-wrapper bg-primary-100">
-              <div class="auth-cover">
-                <div class="title text-center">
-                  <h1 class="text-primary mb-10">Welcome Back</h1>
-                  <p class="text-medium">Sign in to your Existing account to continue</p>
-                </div>
-                <div class="cover-image">
-                  <img src="~/assets/images/auth/signin-image.svg" alt="" />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="signin-wrapper">
-              <div class="" style="padding-top:1rem">  @* form-wrapper *@
-                <h6 class="mb-15">Sign In Form</h6>
-                <p class="text-sm mb-25">Start creating the best possible user experience for your customers.</p>
-
-                <form asp-action="UserLogin" method="post" novalidate>
-                  @Html.AntiForgeryToken()
-                  <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="input-style-1">
-                        <label asp-for="Username"></label>
-                        <input asp-for="Username" class="form-control" placeholder="Email or Username" />
-                        <span asp-validation-for="Username" class="text-danger"></span>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <div class="input-style-1">
-                        <label asp-for="Password"></label>
-                        <input asp-for="Password" class="form-control" autocomplete="current-password" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
-                      </div>
-                    </div>
-                    <div class="col-xxl-6 col-lg-12 col-md-6">
-                      <div class="form-check checkbox-style mb-30">
-                        <input class="form-check-input" type="checkbox" value="true" id="checkbox-remember" name="RememberMe" />
-                        <label class="form-check-label" for="checkbox-remember">Remember me next time</label>
-                      </div>
-                    </div>
-                    <div class="col-xxl-6 col-lg-12 col-md-6">
-                      <div class="text-start text-md-end text-lg-start text-xxl-end mb-30">
-                        <a asp-controller="Home" asp-action="ResetPassword" class="hover-underline">Forgot Password?</a>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <div class="button-group d-flex justify-content-center flex-wrap">
-                        <button type="submit" class="main-btn primary-btn btn-hover w-100 text-center">Sign In</button>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-
-                <div class="singin-option pt-40">
-                  <p class="text-sm text-medium text-center text-gray">Easy Sign In With</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </section>
 
     <script src="~/assets/js/bootstrap.bundle.min.js"></script>
     <script src="~/assets/js/main.js"></script>
-  </body>
+</body>
 </html>
