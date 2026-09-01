@@ -167,7 +167,7 @@ namespace DistriHub.Repository
             if (string.IsNullOrWhiteSpace(username))
                 return null;
 
-            const string sql = "SELECT Password FROM dbo.UserDetails WHERE Username = @Username";
+            const string sql = "SELECT Password FROM dbo.Users WHERE Username = @Username";
 
             await using var conn = new SqlConnection(_connectionString);
             await using var cmd = new SqlCommand(sql, conn);
