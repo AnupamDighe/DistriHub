@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using DistriHub.Logging;
@@ -88,6 +89,15 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddAuthorization();
 
+// Add session support (in-memory cache + session middleware)
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.IdleTimeout = System.TimeSpan.FromMinutes(20);
+});
+
 // Add simple file-based logger (writes warnings and errors to Logs/*.txt)
 builder.Logging.AddFileLogger(options =>
 {
@@ -107,6 +117,48 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+// Enable session middleware so HttpContext.Session is available in controllers and views
+app.UseSession();
+
+// Redirect unauthenticated users to the login page for non-exempt GET requests
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path;
+
+    // Exempt paths: login page, login POST, API, swagger, static assets, and favicon
+    if (path.StartsWithSegments("/Home/UserLogin", System.StringComparison.OrdinalIgnoreCase)
+        || path.StartsWithSegments("/api", System.StringComparison.OrdinalIgnoreCase)
+        || path.StartsWithSegments("/swagger", System.StringComparison.OrdinalIgnoreCase)
+        || path.StartsWithSegments("/assets", System.StringComparison.OrdinalIgnoreCase)
+        || path.StartsWithSegments("/favicon.ico", System.StringComparison.OrdinalIgnoreCase))
+    {
+        await next();
+        return;
+    }
+
+    // Allow login POST through
+    if (context.Request.Path.Equals("/Home/UserLogin", System.StringComparison.OrdinalIgnoreCase)
+        && context.Request.Method.Equals("POST", System.StringComparison.OrdinalIgnoreCase))
+    {
+        await next();
+        return;
+    }
+
+    // Check session-based login (set in HomeController.UserLogin on successful auth)
+    var username = context.Session.GetString("Username");
+    if (string.IsNullOrWhiteSpace(username))
+    {
+        // Only redirect for browser GETs; let other requests pass through
+        if (context.Request.Method.Equals("GET", System.StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.Redirect("/Home/UserLogin");
+            return;
+        }
+    }
+
+    await next();
+});
 
 app.UseAuthentication();
 // Custom JWT middleware to allow token validation and attaching user to HttpContext

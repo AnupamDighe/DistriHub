@@ -33,6 +33,8 @@
     </style>
 </head>
 <body>
+    @using Microsoft.AspNetCore.Http
+    @{ var currentUser = ViewContext.HttpContext.Session.GetString("Username") ?? "Vikrant Bora"; }
     <!-- ======== Preloader =========== -->
     <div id="preloader">
         <div class="spinner"></div>
@@ -98,7 +100,7 @@
                                 @* Search serial number - submits to SerialNoViewController.SerialNoList *@
                                 <form asp-controller="SerialNoView" asp-action="SerialNoList" method="get" class="d-flex">
                                     <input name="serial" type="text" class="form-control" placeholder="Search serial..." />
-                                    <button type="submit" class="btn btn-outline-secondary ms-2"><i class="lni lni-search-alt"></i></button>
+                                    <button type="submit" class="btn btn-outline-secondary ms-2" style="left: 0px !important"><i class="lni lni-search-alt"></i></button>
                                 </form>
                             </div>
                         </div>
@@ -223,7 +225,7 @@
                                                 <img src="@Url.Content("~/assets/images/profile/profile-image.png")" alt="" />
                                             </div>
                                             <div>
-                                                <h6 class="fw-500">Vikrant Bora</h6>
+                                                <h6 class="fw-500">@currentUser</h6>
                                                 <p>Admin</p>
                                             </div>
                                         </div>
@@ -236,14 +238,14 @@
                                                 <img src="@Url.Content("~/assets/images/profile/profile-image.png")" alt="image">
                                             </div>
                                             <div class="content">
-                                                <h4 class="text-sm">Vikrant Bora</h4>
+                                                <h4 class="text-sm">@currentUser</h4>
                                                 <a class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white text-xs" href="#"></a>
                                             </div>
                                         </div>
                                     </li>
                                     <li class="divider"></li>
                                     <li>
-                                        <a href="#0"> <i class="lni lni-exit"></i> Sign Out </a>
+                                        <a asp-controller="Home" asp-action="Logout"> <i class="lni lni-exit"></i> Sign Out </a>
                                     </li>
                                 </ul>
                             </div>

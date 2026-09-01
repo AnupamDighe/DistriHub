@@ -32,6 +32,57 @@ namespace DistriHub.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult UserLogin()
+        {
+            // If user already logged in, redirect to home
+            var current = HttpContext.Session.GetString("Username");
+            if (!string.IsNullOrWhiteSpace(current))
+            {
+                return RedirectToAction("Index");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UserLogin(Models.LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // fetch password from users table via repository
+            var storedPassword = await _repo.GetPasswordByUsernameAsync(model.Username);
+            if (string.IsNullOrEmpty(storedPassword) || storedPassword != model.Password)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid username or password");
+                return View(model);
+            }
+
+            // successful login - set session
+            HttpContext.Session.SetString("Username", model.Username);
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            // Clear session and redirect to login
+            try
+            {
+                HttpContext.Session.Remove("Username");
+                HttpContext.Session.Clear();
+            }
+            catch
+            {
+                // ignore any session errors and proceed to redirect
+            }
+
+            return RedirectToAction("UserLogin");
+        }
+
         public IActionResult FileUpload()
         {
             return View();
