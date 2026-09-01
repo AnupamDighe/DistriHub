@@ -34,7 +34,26 @@
 </head>
 <body>
     @using Microsoft.AspNetCore.Http
-    @{ var currentUser = ViewContext.HttpContext.Session.GetString("Username") ?? "Vikrant Bora"; }
+    @{ 
+        // Safely read session: Session property throws if the session feature is not configured for the request.
+        var currentUser = "Vikrant Bora";
+        try
+        {
+            var sessionFeature = ViewContext.HttpContext.Features.Get<Microsoft.AspNetCore.Http.Features.ISessionFeature>();
+            if (sessionFeature?.Session != null)
+            {
+                var username = ViewContext.HttpContext.Session.GetString("Username");
+                if (!string.IsNullOrWhiteSpace(username))
+                {
+                    currentUser = username;
+                }
+            }
+        }
+        catch
+        {
+            // If anything goes wrong reading session, fall back to default display name.
+        }
+    }
     <!-- ======== Preloader =========== -->
     <div id="preloader">
         <div class="spinner"></div>
