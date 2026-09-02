@@ -3,26 +3,29 @@
     ViewData["Title"] = "Product Details";
     var serial = (string?)ViewData["Serial"] ?? string.Empty;
 }
+       
 @section Styles {
     <link rel="stylesheet" href="~/css/serial.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" />
     <style>
-        /* Responsive table: stack cells on small screens using data-label */
+        /* Responsive stacked layout for non-DataTable tables only. DataTables (dt-responsive) handles its own responsive behavior. */
         @@media (max-width: 767.98px) {
-            .table-responsive table thead { display: none; }
-            .table-responsive table, .table-responsive tbody, .table-responsive tr, .table-responsive td {
+            /* Apply only to tables that are NOT using DataTables responsive (dt-responsive) */
+            .table-responsive table:not(.dt-responsive) thead { display: none; }
+            .table-responsive table:not(.dt-responsive), .table-responsive table:not(.dt-responsive) tbody, .table-responsive table:not(.dt-responsive) tr, .table-responsive table:not(.dt-responsive) td {
                 display: block;
                 width: 100%;
             }
-            .table-responsive tr { margin-bottom: 1rem; border: 1px solid #e9ecef; padding: .5rem; }
-            .table-responsive td {
+            .table-responsive table:not(.dt-responsive) tr { margin-bottom: 1rem; border: 1px solid #e9ecef; padding: .5rem; }
+            .table-responsive table:not(.dt-responsive) td {
                 text-align: left;
                 padding-left: 50%;
                 position: relative;
                 white-space: normal;
             }
-            .table-responsive td::before {
+            .table-responsive table:not(.dt-responsive) td::before {
                 content: attr(data-label);
                 position: absolute;
                 left: .75rem;
@@ -34,6 +37,22 @@
                 text-overflow: ellipsis;
             }
         }
+            /* Ensure DataTables child-row (dtr-details) labels and values are left aligned to override inherited centering */
+            .dtr-details th {
+                width: 40%;
+                padding: .75rem .5rem;
+                font-weight: 700;
+                text-align: left !important;
+                vertical-align: top;
+                white-space: normal;
+            }
+            .dtr-details td {
+                width: 60%;
+                padding: .75rem .5rem;
+                vertical-align: top;
+                white-space: normal;
+                text-align: left !important;
+            }
     </style>
 }
 
@@ -60,7 +79,7 @@
                                 <button id="btnFilter" class="btn btn-sm btn-primary">Filter</button>
                                 <button id="btnClear" class="btn btn-sm btn-secondary ms-2">Clear</button> *@
                             </div>
-                            <table id="productTable" class="table table-hover align-middle table-striped" style="width:100%">
+                            <table id="productTable" class="table table-striped table-hover align-middle dt-responsive nowrap" style="width:100%">
                                 <thead class="table-light">
                                     <tr class="text-center">
                                         @* <th scope="col">ProductId</th> *@
@@ -92,10 +111,16 @@
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
     <!-- JSZip for excelHtml5 export. Use a reliable CDN without integrity to avoid mismatched hash errors in some environments -->
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
     <script>
         $(document).ready(function () {
             var table = $('#productTable').DataTable({
@@ -118,43 +143,51 @@
                         }
                     }
                 ],
+                // Use DataTables Responsive and allow horizontal scrolling on small screens
                 responsive: true,
+                // horizontal scrolling to allow wide tables on small devices
+                scrollX: true,
+                autoWidth: false,
                 processing: true,
-                serverSide: true, // server-side processing for large datasets
+                serverSide: true,
                 deferRender: true,
                 paging: true,
-                // default to showing All entries (DataTables uses -1 for 'All')
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
-                language: {
-                    lengthMenu: 'Show _MENU_ entries'
-                },
+                language: { lengthMenu: 'Show _MENU_ entries' },
                 searching: true,
                 ordering: true,
                 ajax: {
                     url: '/SerialNoView/ApiGetProductDetails',
-                    type: 'POST', // use POST to avoid very long query strings from DataTables
+                    type: 'POST',
                     dataSrc: 'data',
-                    data: function (d) {
-                        // send serial filter explicitly if present
-                        d.serial = $('#serialFilter').val();
-                    }
+                    data: function (d) { d.serial = $('#serialFilter').val(); }
                 },
                 columns: [
-                    { data: 'serialNo' },
-                    { data: 'categoryName' },
-                    { data: 'subCategoryName' },
-                    { data: 'modelName' },
-                    // { data: 'uploadDate', className: 'text-center', render: function (data) { return data ? data.substring(0, 10) : ''; } },
-                    { data: 'isUsedDisplay' },
-                    { data: 'distributor' },
-                    { data: 'dealer' },
-                    { data: 'finance' },
-                    { data: 'financeDate', render: function (data) { return data ? data.substring(0, 10) : ''; } },
-                    { data: 'installation' }
+                    { data: 'serialNo', title: 'Serial No' },
+                    { data: 'categoryName', title: 'Category Name' },
+                    { data: 'subCategoryName', title: 'Sub Category Name' },
+                    { data: 'modelName', title: 'Model Name' },
+                    { data: 'isUsedDisplay', title: 'Is Used Display' },
+                    { data: 'distributor', title: 'Distributor' },
+                    { data: 'dealer', title: 'Dealer' },
+                    { data: 'finance', title: 'Finance' },
+                    { data: 'financeDate', title: 'FinanceDate', render: function (data) { return data ? data.substring(0, 10) : ''; } },
+                    { data: 'installation', title: 'Installation' }
                 ],
                 columnDefs: [
-                    { targets: [1,2,3], className: 'text-center' }
+                    // Align all table cells left for better mobile display
+                    { targets: '_all', className: 'text-start' },
+                    { targets: 0, responsivePriority: 1 },
+                    { targets: 3, responsivePriority: 2 },
+                    { targets: 1, responsivePriority: 3 },
+                    { targets: 2, responsivePriority: 4 },
+                    { targets: 4, responsivePriority: 5 },
+                    { targets: 5, responsivePriority: 6 },
+                    { targets: 6, responsivePriority: 7 },
+                    { targets: 7, responsivePriority: 8 },
+                    { targets: 8, responsivePriority: 9 },
+                    { targets: 9, responsivePriority: 10 }
                 ]
             });
         });

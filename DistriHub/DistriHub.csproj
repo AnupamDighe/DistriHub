@@ -14,20 +14,9 @@
 
   <ItemGroup>
     <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\alerts.html" Link="Views\alerts.html" />
-    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\blank-page.html" Link="Views\blank-page.html" />
-    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\buttons.html" Link="Views\buttons.html" />
-    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\cards.html" Link="Views\cards.html" />
-    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\form-elements.html" Link="Views\form-elements.html" />
-    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\icons.html" Link="Views\icons.html" />
-    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\index.html" Link="Views\index.html" />
-    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\invoice.html" Link="Views\invoice.html" />
-    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\mdi-icons.html" Link="Views\mdi-icons.html" />
-    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\notification.html" Link="Views\notification.html" />
-    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\settings.html" Link="Views\settings.html" />
     <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\signin.html" Link="Views\signin.html" />
     <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\signup.html" Link="Views\signup.html" />
     <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\tables.html" Link="Views\tables.html" />
-    <Content Include="..\..\..\..\..\..\..\Users\dighe\Downloads\plain-free-bootstrap-admin-template-main (2)\plain-free-bootstrap-admin-template-main\typography.html" Link="Views\typography.html" />
   </ItemGroup>
 
   <ItemGroup>
