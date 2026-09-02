@@ -6,6 +6,9 @@ namespace DistriHub.Logging
 {
     public class FileLoggerOptions
     {
+        // Set Enabled = false to disable file logging by default.
+        // Call AddFileLogger(builder, opts => opts.Enabled = true) to enable.
+        public bool Enabled { get; set; } = false;
         public string? LogDirectory { get; set; }
         public string FileNamePrefix { get; set; } = "distrihub";
     }
@@ -97,7 +100,11 @@ namespace DistriHub.Logging
         {
             var options = new FileLoggerOptions();
             configure?.Invoke(options);
-            builder.AddProvider(new FileLoggerProvider(options));
+            // Only add the file logger provider when explicitly enabled.
+            if (options.Enabled)
+            {
+                builder.AddProvider(new FileLoggerProvider(options));
+            }
             return builder;
         }
     }
