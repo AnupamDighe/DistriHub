@@ -113,6 +113,44 @@
                 width: 100%;
             }
 
+            /* Reduce vertical spacing and padding inside the sign-in form */
+            .form-wrapper {
+                padding: 0.25rem; /* reduce outer padding */
+            }
+
+            .form-wrapper .row {
+                margin: 0; /* remove negative gutters inside compact form */
+            }
+
+            .form-wrapper .col-12 {
+                padding-left: 0;
+                padding-right: 0; /* remove extra column padding to tighten layout */
+            }
+
+            .form-wrapper h6,
+            .form-wrapper p {
+                margin-top: 0;
+                margin-bottom: 0.5rem; /* smaller heading/intro spacing */
+            }
+
+            .input-style-1 {
+                margin-bottom: 0.5rem; /* reduce space between input groups */
+            }
+
+            .input-style-1 label {
+                margin-bottom: 0.25rem;
+                display: block;
+            }
+
+            .input-style-1 input.form-control {
+                padding: 0.6rem 0.75rem; /* slightly smaller input padding */
+            }
+
+            .form-check {
+                margin-top: 0.25rem;
+                margin-bottom: 0.5rem;
+            }
+
             /* Small screens: hide illustration and allow page scrolling if needed */
             @@media (max-width: 767.98px) {
                 body {
@@ -137,9 +175,9 @@
     </style>
 </head>
 <body>
-    <section class="signin-section" style="margin-top:10px">
+    <section class="signin-section" style="padding-top:2rem">
         <div class="container-fluid">
-            <div class="title-wrapper pt-60">
+         @*    <div class="title-wrapper">
                 <div class="row align-items-center">
                     <div class="col-12 col-md-6">
                         <div class="title">
@@ -147,7 +185,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>  *@
 
             <div class="row g-0 auth-row">
                 <div class="col-lg-6 col-md-6 col-sm-12">
